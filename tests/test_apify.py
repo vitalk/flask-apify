@@ -125,3 +125,19 @@ def test_apify_handle_custom_errors(apify, client, accept_mimetypes):
     res = client.get('/teapot', headers=accept_mimetypes)
     assert res.status_code == 418
     assert 'This server is a teapot, not a coffee machine' in res.data
+
+
+def test_apify_allow_apply_route_decorator_multiple_times(apify, client, accept_json):
+    @apify.route('/ping', defaults={'value': 200})
+    @apify.route('/ping/<int:value>')
+    def ping(value):
+        return {'value': value}
+    apifinalize(apify)
+
+    res = client.get('/ping', headers=accept_json)
+    assert res.status == '200 OK'
+    assert '{"value": 200}' == res.data
+
+    res = client.get('/ping/404', headers=accept_json)
+    assert res.status == '200 OK'
+    assert '{"value": 404}' == res.data

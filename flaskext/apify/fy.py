@@ -110,6 +110,17 @@ class Apify(object):
         The passed view function decorates to catch all :class:`ApiError` errors
         to produce nice output on view errors.
 
+        To allow apply decorator multiple times function will be decorated only
+        if not previously decorated, e.g. has no attribute
+        :attr:`is_api_method`.
+
+        Example::
+
+            @apify.route('/ping', defaults={'value': 200})
+            @apify.route('/ping/<int:value>')
+            def ping(value):
+                pass
+
         :param rule: The URL rule string
         :param options: The options to be forwarded to the
             underlying :class:`~werkzeug.routing.Rule` object.
@@ -123,7 +134,9 @@ class Apify(object):
 
         """
         def wrapper(fn):
-            fn = catch_errors(ApiError)(fn)
+            if not hasattr(fn, 'is_api_method'):
+                fn = catch_errors(ApiError)(fn)
+                fn.is_api_method = True
             self.blueprint.add_url_rule(rule, view_func=fn, **options)
             return fn
         return wrapper
