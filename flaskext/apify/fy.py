@@ -9,6 +9,7 @@
     :copyright: (c) by Vital Kudzelka
 """
 from functools import wraps
+from itertools import chain
 
 from flask import g
 from flask import request
@@ -48,6 +49,8 @@ class Apify(object):
 
     :param app: Flask application instance
     :param url_prefix: The url prefix to mount blueprint.
+    :param preprocessor_funcs: A list of functions that should decorate a view
+        function.
     :param finalizer_funcs: A list of functions that should be called after each
         request.
     """
@@ -59,8 +62,15 @@ class Apify(object):
         'application/javascript': to_json,
     }
 
-    def __init__(self, app=None, url_prefix=None, finalizer_funcs=None):
+    def __init__(self, app=None, url_prefix=None, preprocessor_funcs=None,
+        finalizer_funcs=None):
+
         self.url_prefix = url_prefix
+
+        # A list of functions that should decorate original view function. To
+        # register a function here, use the :meth:`preprocessor` decorator.
+        self.preprocessor_funcs = list(chain((preprocess_api_response,),
+                                             preprocessor_funcs or ()))
 
         # A list of functions that should be called after each request. To
         # register a function here, use the :meth:`finalizer` decorator.
@@ -169,6 +179,21 @@ class Apify(object):
             return fn
         return wrapper
 
+    def preprocessor(self, fn):
+        """Register a function to decorate original view function.
+
+        :param fn: A view decorator
+
+        Example::
+
+            @apify.finalizer
+            def login_required(fn):
+                raise ApiUnauthorized()
+
+        """
+        self.preprocessor_funcs.append(fn)
+        return fn
+
     def finalizer(self, fn):
         """Register a function to run after :class:`~flask.Response` object is
         created.
@@ -207,16 +232,29 @@ def catch_errors(*errors):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                preprocess_api_response()
-                res = send_api_response(fn(*args, **kwargs))
+                # Call preprocessors
+                func = apply_all(_apify.preprocessor_funcs, fn)
 
-                for func in _apify.finalizer_funcs:
-                    res = func(res)
-                return res
+                # Make a response object
+                res = send_api_response(func(*args, **kwargs))
+
+                # Finalize response
+                return apply_all(_apify.finalizer_funcs, res)
             except errors as exc:
                 return send_api_error(exc)
         return wrapper
     return decorator
+
+
+def apply_all(funcs, arg):
+    """Returns the result of applying function to arg.
+
+    :param funcs: The list of functions to apply passed argument
+    :param arg: The argument passed to each function recursively
+    """
+    for func in funcs:
+        arg = func(arg)
+    return arg
 
 
 def create_blueprint(name, url_prefix):
@@ -230,7 +268,7 @@ def create_blueprint(name, url_prefix):
                      template_folder='templates')
 
 
-def preprocess_api_response():
+def preprocess_api_response(fn):
     """Preprocess response.
 
     Set the best possible serializer and mimetype for response to the
@@ -243,6 +281,7 @@ def preprocess_api_response():
     except ApiNotAcceptable as exc:
         g.api_mimetype, g.api_serializer = get_default_serializer()
         raise exc
+    return fn
 
 
 def guess_best_mimetype():

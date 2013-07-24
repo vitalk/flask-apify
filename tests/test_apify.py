@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from flask.ext.apify.fy import preprocess_api_response
 from flask.ext.apify.exc import ApiError
+from flask.ext.apify.exc import ApiUnauthorized
 from flask.ext.apify.exc import ApiNotAcceptable
 from flask.ext.apify.serializers import to_json
 from flask.ext.apify.serializers import to_debug
@@ -142,6 +144,25 @@ def test_apify_allow_apply_route_decorator_multiple_times(apify, client, accept_
     res = client.get('/ping/404', headers=accept_json)
     assert res.status == '200 OK'
     assert '{"value": 404}' == res.data
+
+
+def test_apify_add_preprocessor(apify):
+    fn = lambda x: x
+    apify.preprocessor(fn)
+
+    assert apify.preprocessor_funcs == [preprocess_api_response, fn]
+
+
+def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
+    add_api_rule(apify)
+
+    @apify.preprocessor
+    def login_required(fn):
+        raise ApiUnauthorized()
+
+    res = client.get('/wtf', headers=accept_mimetypes)
+    assert res.status == '401 UNAUTHORIZED'
+    assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
 def test_apify_add_finalizer(apify):
