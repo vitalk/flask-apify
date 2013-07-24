@@ -27,6 +27,7 @@ def accept_json():
 
 def test_apify_init(webapp, apify):
     assert 'apify' in webapp.extensions
+    assert apify.finalizer_funcs == []
     assert apify.serializers['text/html'] is to_debug
     assert apify.serializers['application/json'] is to_json
     assert apify.serializers['application/javascript'] is to_json
@@ -141,3 +142,37 @@ def test_apify_allow_apply_route_decorator_multiple_times(apify, client, accept_
     res = client.get('/ping/404', headers=accept_json)
     assert res.status == '200 OK'
     assert '{"value": 404}' == res.data
+
+
+def test_apify_add_finalizer(apify):
+    fn = lambda x: x
+    apify.finalizer(fn)
+
+    assert fn in apify.finalizer_funcs
+
+
+def test_apify_exec_finalizer(apify, client, accept_mimetypes):
+    add_api_rule(apify)
+
+    @apify.finalizer
+    def set_custom_header(res):
+        res.headers['X-Rate-Limit'] = 42
+        return res
+
+    res = client.get('/wtf', headers=accept_mimetypes)
+    assert res.status == '200 OK'
+    assert res.headers['X-Rate-Limit'] == '42'
+
+
+def test_apify_can_handle_finalizer_error(apify, client, accept_mimetypes):
+    add_api_rule(apify)
+
+    class ImATeapot(ApiError):
+        code = 418
+
+    def fn(res): raise ImATeapot('Server too hot. Try it later.')
+    apify.finalizer(fn)
+
+    res = client.get('/wtf', headers=accept_mimetypes)
+    assert res.status == '418 I\'M A TEAPOT'
+    assert 'Server too hot. Try it later.' in res.data

@@ -14,6 +14,8 @@ from flask import g
 from flask import request
 from flask import Response
 from flask import Blueprint
+from flask import current_app
+from werkzeug.local import LocalProxy
 from werkzeug.datastructures import ImmutableDict
 
 from .utils import key
@@ -46,6 +48,8 @@ class Apify(object):
 
     :param app: Flask application instance
     :param url_prefix: The url prefix to mount blueprint.
+    :param finalizer_funcs: A list of functions that should be called after each
+        request.
     """
 
     # the serializer function per mimetype
@@ -55,8 +59,13 @@ class Apify(object):
         'application/javascript': to_json,
     }
 
-    def __init__(self, app=None, url_prefix=None):
+    def __init__(self, app=None, url_prefix=None, finalizer_funcs=None):
         self.url_prefix = url_prefix
+
+        # A list of functions that should be called after each request. To
+        # register a function here, use the :meth:`finalizer` decorator.
+        self.finalizer_funcs = finalizer_funcs or []
+
         if app is not None:
             self.init_app(app)
 
@@ -160,6 +169,22 @@ class Apify(object):
             return fn
         return wrapper
 
+    def finalizer(self, fn):
+        """Register a function to run after :class:`~flask.Response` object is
+        created.
+
+        :param fn: A function to register
+
+        Example::
+
+            @apify.finalizer
+            def set_custom_header(res):
+                res.headers['X-Rate-Limit'] = 42
+
+        """
+        self.finalizer_funcs.append(fn)
+        return fn
+
 
 def catch_errors(*errors):
     """The decorator to catch errors raised inside the decorated function.
@@ -183,7 +208,11 @@ def catch_errors(*errors):
         def wrapper(*args, **kwargs):
             try:
                 preprocess_api_response()
-                return send_api_response(fn(*args, **kwargs))
+                res = send_api_response(fn(*args, **kwargs))
+
+                for func in _apify.finalizer_funcs:
+                    res = func(res)
+                return res
             except errors as exc:
                 return send_api_error(exc)
         return wrapper
@@ -243,3 +272,6 @@ def send_api_error(exc):
         'message': exc.description,
     }
     return send_api_response((raw, exc.code))
+
+
+_apify = LocalProxy(lambda: current_app.extensions['apify'])
