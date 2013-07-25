@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from flask import Response
 from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
@@ -197,3 +198,17 @@ def test_apify_can_handle_finalizer_error(apify, client, accept_mimetypes):
     res = client.get('/wtf', headers=accept_mimetypes)
     assert res.status == '418 I\'M A TEAPOT'
     assert 'Server too hot. Try it later.' in res.data
+
+
+def test_preprocessor_may_rewrite_view_response(apify, client, accept_json):
+    add_api_rule(apify)
+
+    @apify.preprocessor
+    def rewrite_response(fn):
+        def wrapper():
+            return Response('response has been rewritten', mimetype='custom/mimetype')
+        return wrapper
+
+    res = client.get('/wtf', headers=accept_json)
+    assert res.mimetype == 'custom/mimetype'
+    assert 'response has been rewritten' == res.data

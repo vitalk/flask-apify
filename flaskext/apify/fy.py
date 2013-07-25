@@ -17,6 +17,7 @@ from flask import Response
 from flask import Blueprint
 from flask import current_app
 from werkzeug.local import LocalProxy
+from werkzeug.wrappers import Response as _Response
 from werkzeug.datastructures import ImmutableDict
 
 from .utils import key
@@ -294,6 +295,9 @@ def make_api_response(raw):
 
     :param raw: The raw data to send
     """
+    if isinstance(raw, _Response):
+        return raw
+
     raw, code, headers = unpack_response(raw)
 
     res = Response(g.api_serializer(raw), headers=headers, mimetype=g.api_mimetype)
