@@ -69,7 +69,7 @@ class Apify(object):
 
         # A list of functions that should decorate original view function. To
         # register a function here, use the :meth:`preprocessor` decorator.
-        self.preprocessor_funcs = list(chain((preprocess_api_response,),
+        self.preprocessor_funcs = list(chain((set_best_serializer,),
                                              preprocessor_funcs or ()))
 
         # A list of functions that should be called after each request. To
@@ -268,13 +268,13 @@ def create_blueprint(name, url_prefix):
                      template_folder='templates')
 
 
-def preprocess_api_response(fn):
-    """Preprocess response.
-
-    Set the best possible serializer and mimetype for response to the
+def set_best_serializer(fn):
+    """Set the best possible serializer and mimetype for response to the
     application globals according with the request accept header.
 
     Reraise on `ApiNotAcceptable` error.
+
+    :param fn: A view function to decorate
     """
     try:
         g.api_mimetype, g.api_serializer = get_serializer(guess_best_mimetype())

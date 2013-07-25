@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask.ext.apify.fy import preprocess_api_response
+from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
 from flask.ext.apify.exc import ApiNotAcceptable
@@ -150,7 +150,7 @@ def test_apify_add_preprocessor(apify):
     fn = lambda x: x
     apify.preprocessor(fn)
 
-    assert apify.preprocessor_funcs == [preprocess_api_response, fn]
+    assert apify.preprocessor_funcs == [set_best_serializer, fn]
 
 
 def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
