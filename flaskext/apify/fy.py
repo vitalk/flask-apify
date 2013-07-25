@@ -236,7 +236,7 @@ def catch_errors(*errors):
                 func = apply_all(_apify.preprocessor_funcs, fn)
 
                 # Make a response object
-                res = send_api_response(func(*args, **kwargs))
+                res = make_api_response(func(*args, **kwargs))
 
                 # Finalize response
                 return apply_all(_apify.finalizer_funcs, res)
@@ -289,7 +289,7 @@ def guess_best_mimetype():
     return request.accept_mimetypes.best
 
 
-def send_api_response(raw):
+def make_api_response(raw):
     """Returns the valid response object.
 
     :param raw: The raw data to send
@@ -310,7 +310,7 @@ def send_api_error(exc):
         'error': exc.name,
         'message': exc.description,
     }
-    return send_api_response((raw, exc.code))
+    return make_api_response((raw, exc.code))
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
