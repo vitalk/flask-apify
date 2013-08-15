@@ -49,6 +49,14 @@ class ApiNotAcceptable(ApiError):
     )
 
 
+class ApiUnprocessableEntity(ApiError):
+    """Raise if the client send invalid fields in request."""
+    code = 422
+    description = (
+        "The client missed required field or send invalid fields in request."
+    )
+
+
 class ApiNotImplemented(ApiError):
     """Raise if the application does not support the action requested by the
     client.
