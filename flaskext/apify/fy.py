@@ -252,6 +252,15 @@ def apply_all(funcs, arg):
 
     :param funcs: The list of functions to apply passed argument
     :param arg: The argument passed to each function recursively
+
+    The result of:
+
+        apply_all((one, two), arg)
+
+    is equivalent to:
+
+        one(two(arg))
+
     """
     for func in funcs:
         arg = func(arg)
