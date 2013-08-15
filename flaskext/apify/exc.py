@@ -37,6 +37,16 @@ class ApiUnauthorized(ApiError):
     )
 
 
+class ApiForbidden(ApiError):
+    """Raise if the user is authenticated but does not have the permission for
+    the requested resource.
+    """
+    code = 403
+    description = (
+        "You don\'t have the permission to access the requested resource."
+    )
+
+
 class ApiNotAcceptable(ApiError):
     """Raise if the application cannot return response in format that client
     accept.
