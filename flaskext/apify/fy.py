@@ -103,22 +103,6 @@ class Apify(object):
         app.extensions['apify'] = self
         return self
 
-    def register_routes(self):
-        """Register all routes created by extension to an application.
-
-        You MUST call this method after registration ALL view functions.
-
-        Example::
-
-            apify.route('/todos')(lambda: 'todos')
-            apify.route('/todos/<int:todo_id>')(lambda x: 'todo %s' % x)
-
-            # later
-            apify.register_routes()
-
-        """
-        self.app.register_blueprint(self.blueprint)
-
     def route(self, rule, **options):
         """A decorator that is used to register a view function for a given URL
         rule, same as :meth:`route` in :class:`~flask.Blueprint` object.
