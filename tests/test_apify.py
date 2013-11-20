@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from flask import Flask
 from flask import Response
+from flask.ext.apify import Apify
 from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
@@ -11,6 +13,12 @@ from flask.ext.apify.serializers import to_json
 from flask.ext.apify.serializers import to_debug
 from flask.ext.apify.serializers import get_serializer
 from flask.ext.apify.serializers import get_default_serializer
+
+
+@pytest.fixture
+def app():
+    app = Flask(__name__)
+    return app
 
 
 @pytest.fixture(params=['application/json', 'application/javascript', 'text/html'])
@@ -35,6 +43,18 @@ def test_apify_init(webapp, apify):
     assert apify.serializers['text/html'] is to_debug
     assert apify.serializers['application/json'] is to_json
     assert apify.serializers['application/javascript'] is to_json
+
+
+def test_apify_does_not_require_app_object_while_instantiated(app, accept_mimetypes):
+    apify = Apify()
+    add_api_rule(apify, dofinalize=False)
+
+    apify.init_app(app)
+    app.register_blueprint(apify.blueprint)
+
+    with app.test_client() as client:
+        res = client.get('/wtf', headers=accept_mimetypes)
+        assert 'api call done' in res.data
 
 
 def test_apify_register_serializer_for_mimetype(webapp, apify):
