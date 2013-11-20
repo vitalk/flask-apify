@@ -21,14 +21,12 @@ def test_get_config():
 
 def test_self_config(webapp):
     assert self_config(webapp) == {
-        'BLUEPRINT_NAME': 'api',
         'APIDUMP_TEMPLATE': 'apidump.html',
         'DEFAULT_MIMETYPE': 'application/json',
     }
 
 
 def test_self_config_value(webapp):
-    assert self_config_value('blueprint_name', webapp) == 'api'
     assert self_config_value('apidump_template', webapp) == 'apidump.html'
     assert self_config_value('default_mimetype', webapp) == 'application/json'
 
