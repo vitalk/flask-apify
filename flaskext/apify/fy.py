@@ -34,9 +34,6 @@ from .serializers import get_default_serializer
 
 
 default_config = ImmutableDict({
-    # The name of the blueprint to register API endpoints
-    'blueprint_name': 'api',
-
     # The default mimetype returned by API endpoints
     'default_mimetype': 'application/json',
 
@@ -49,6 +46,8 @@ class Apify(object):
     """The Flask extension to create an API to your application as a ninja.
 
     :param app: Flask application instance
+    :param blueprint_name: A name of the blueprint created, also uses to make a
+        URLs via :func:`url_for` calls
     :param url_prefix: The url prefix to mount blueprint.
     :param preprocessor_funcs: A list of functions that should decorate a view
         function.
@@ -63,10 +62,8 @@ class Apify(object):
         'application/javascript': to_json,
     }
 
-    def __init__(self, app=None, url_prefix=None, preprocessor_funcs=None,
-        finalizer_funcs=None):
-
-        self.url_prefix = url_prefix
+    def __init__(self, app=None, blueprint_name='api', url_prefix=None,
+                 preprocessor_funcs=None, finalizer_funcs=None):
 
         # A list of functions that should decorate original view function. To
         # register a function here, use the :meth:`preprocessor` decorator.
@@ -76,6 +73,8 @@ class Apify(object):
         # A list of functions that should be called after each request. To
         # register a function here, use the :meth:`finalizer` decorator.
         self.finalizer_funcs = finalizer_funcs or []
+
+        self.blueprint = create_blueprint(blueprint_name, url_prefix)
 
         if app is not None:
             self.init_app(app)
@@ -100,28 +99,9 @@ class Apify(object):
         for k, v in default_config.iteritems():
             app.config.setdefault(key(k), v)
 
-        self.blueprint = create_blueprint(self_config_value('blueprint_name', app),
-                                          self.url_prefix)
-
         app.extensions = getattr(app, 'extensions', {})
         app.extensions['apify'] = self
         return self
-
-    def register_routes(self):
-        """Register all routes created by extension to an application.
-
-        You MUST call this method after registration ALL view functions.
-
-        Example::
-
-            apify.route('/todos')(lambda: 'todos')
-            apify.route('/todos/<int:todo_id>')(lambda x: 'todo %s' % x)
-
-            # later
-            apify.register_routes()
-
-        """
-        self.app.register_blueprint(self.blueprint)
 
     def route(self, rule, **options):
         """A decorator that is used to register a view function for a given URL

@@ -55,8 +55,8 @@ def todo(todo_id):
     return {todo_id: mytodos[todo_id]}
 
 
-# important to register all added routes to application
-apify.register_routes()
+# important to register all added routes to an application
+app.register_blueprint(apify.blueprint)
 
 
 if __name__ == '__main__':
