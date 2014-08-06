@@ -36,6 +36,11 @@ def accept_json():
     return accept_mimetypes('application/json')
 
 
+@pytest.fixture
+def dummyfn():
+    return lambda x: x
+
+
 def test_apify_init(webapp, apify):
     assert 'apify' in webapp.extensions
     assert apify.blueprint is not None
@@ -57,14 +62,13 @@ def test_apify_does_not_require_app_object_while_instantiated(app, accept_mimety
         assert 'api call done' in res.data
 
 
-def test_apify_register_serializer_for_mimetype(webapp, apify):
-    fn = lambda x: x
-    apify.serializer('application/xml')(fn)
+def test_apify_register_serializer_for_mimetype(webapp, apify, dummyfn):
+    apify.serializer('application/xml')(dummyfn)
 
     with webapp.test_request_context():
         mimetype, serializer = get_serializer('application/xml')
         assert mimetype == 'application/xml'
-        assert serializer is fn
+        assert serializer is dummyfn
 
 
 def add_api_rule(app,
@@ -169,11 +173,13 @@ def test_apify_allow_apply_route_decorator_multiple_times(webapp, apify, client,
     assert '{"value": 404}' == res.data
 
 
-def test_apify_add_preprocessor(apify):
-    fn = lambda x: x
-    apify.preprocessor(fn)
+def test_apify_add_preprocessor(apify, dummyfn):
+    apify.preprocessor(dummyfn)
+    assert dummyfn in apify.preprocessor_funcs
 
-    assert apify.preprocessor_funcs == [set_best_serializer, fn]
+
+def test_apify_add_function_to_set_best_serializer_as_default_preprocessor(apify):
+    assert set_best_serializer in apify.preprocessor_funcs
 
 
 def test_apify_exec_preprocessors(webapp, apify, client, accept_mimetypes):
@@ -188,11 +194,9 @@ def test_apify_exec_preprocessors(webapp, apify, client, accept_mimetypes):
     assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
-def test_apify_add_finalizer(apify):
-    fn = lambda x: x
-    apify.finalizer(fn)
-
-    assert fn in apify.finalizer_funcs
+def test_apify_add_finalizer(apify, dummyfn):
+    apify.finalizer(dummyfn)
+    assert dummyfn in apify.finalizer_funcs
 
 
 def test_apify_exec_finalizer(webapp, apify, client, accept_mimetypes):
