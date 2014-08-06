@@ -49,10 +49,10 @@ class Apify(object):
     :param blueprint_name: A name of the blueprint created, also uses to make a
         URLs via :func:`url_for` calls
     :param url_prefix: The url prefix to mount blueprint.
-    :param preprocessor_funcs: A list of functions that should decorate a view
-        function.
-    :param finalizer_funcs: A list of functions that should be called after each
-        request.
+    :param preprocessor_funcs: A list of functions that should be called
+        before a view callable.
+    :param finalizer_funcs: A list of functions that should be called after
+        response object has been created.
     """
 
     # the serializer function per mimetype
@@ -65,13 +65,14 @@ class Apify(object):
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
                  preprocessor_funcs=None, finalizer_funcs=None):
 
-        # A list of functions that should decorate original view function. To
+        # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
         self.preprocessor_funcs = list(chain((set_best_serializer,),
                                              preprocessor_funcs or ()))
 
-        # A list of functions that should be called after each request. To
-        # register a function here, use the :meth:`finalizer` decorator.
+        # A list of functions that should be called after response object has
+        # been created. To register a function here, use the :meth:`finalizer`
+        # decorator.
         self.finalizer_funcs = finalizer_funcs or []
 
         self.blueprint = create_blueprint(blueprint_name, url_prefix)
