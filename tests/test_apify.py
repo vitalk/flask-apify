@@ -194,6 +194,24 @@ def test_apify_exec_preprocessors(webapp, apify, client, accept_mimetypes):
     assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
+def test_apify_register_postprocessor(apify, dummyfn):
+    apify.postprocessor(dummyfn)
+    assert dummyfn in apify.postprocessor_funcs
+
+
+def test_apify_exec_postprocessor(webapp, apify, client, accept_json):
+    add_api_rule(webapp, apify)
+
+    @apify.postprocessor
+    def attach_something(raw):
+        raw.update(something=42)
+        return raw
+
+    res = client.get('/wtf', headers=accept_json)
+    assert res.status == '200 OK'
+    assert res.data == '{"something": 42, "status": "api call done"}'
+
+
 def test_apify_add_finalizer(apify, dummyfn):
     apify.finalizer(dummyfn)
     assert dummyfn in apify.finalizer_funcs

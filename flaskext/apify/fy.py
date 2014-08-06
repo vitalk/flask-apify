@@ -51,6 +51,8 @@ class Apify(object):
     :param url_prefix: The url prefix to mount blueprint.
     :param preprocessor_funcs: A list of functions that should be called
         before a view callable.
+    :param postprocessor_funcs: A list of functions that should be called
+        after a view callable done but response object is not exists yet.
     :param finalizer_funcs: A list of functions that should be called after
         response object has been created.
     """
@@ -63,12 +65,18 @@ class Apify(object):
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
-                 preprocessor_funcs=None, finalizer_funcs=None):
+                 preprocessor_funcs=None, postprocessor_funcs=None,
+                 finalizer_funcs=None):
 
         # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
         self.preprocessor_funcs = list(chain((set_best_serializer,),
                                              preprocessor_funcs or ()))
+
+        # A list of functions that should be called after original view
+        # callable done but respone object is not yet exists. To register a
+        # function here, use the :meth:`postprocessor` decorator.
+        self.postprocessor_funcs = postprocessor_funcs or []
 
         # A list of functions that should be called after response object has
         # been created. To register a function here, use the :meth:`finalizer`
@@ -176,6 +184,23 @@ class Apify(object):
         self.preprocessor_funcs.append(fn)
         return fn
 
+    def postprocessor(self, fn):
+        """Register a function as request postprocessor.
+
+        :param fn: A request postprocessor function.
+
+        Postprocessor function must carefully process incoming data, e.g view
+        callable may returns optional status code and headers dictionary::
+
+            @apify.postprocessor
+            def modify_view_result(raw):
+                raw, code, headers = unpack_response(raw)
+                return raw, code, headers
+
+        """
+        self.postprocessor_funcs.append(fn)
+        return fn
+
     def finalizer(self, fn):
         """Register a function to run after :class:`~flask.Response` object is
         created.
@@ -214,11 +239,17 @@ def catch_errors(*errors):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                # Call preprocessors
+                # Call preprocessor functions
                 func = apply_all(_apify.preprocessor_funcs, fn)
 
+                # Call view callable
+                raw = func(*args, **kwargs)
+
+                # Call postprocessor functions
+                raw = apply_all(_apify.postprocessor_funcs, raw)
+
                 # Make a response object
-                res = make_api_response(func(*args, **kwargs))
+                res = make_api_response(raw)
 
                 # Finalize response
                 return apply_all(_apify.finalizer_funcs, res)
