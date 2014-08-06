@@ -167,7 +167,7 @@ class Apify(object):
 
         Example::
 
-            @apify.finalizer
+            @apify.preprocessor
             def login_required(fn):
                 raise ApiUnauthorized()
 
