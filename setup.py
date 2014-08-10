@@ -13,7 +13,7 @@ from setuptools import setup
 
 setup(
     name='flask-apify',
-    version='0.2',
+    version='0.3.0',
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
