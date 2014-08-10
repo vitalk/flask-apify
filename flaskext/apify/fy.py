@@ -207,7 +207,9 @@ class Apify(object):
 
         :param fn: A function to register
 
-        Example::
+        Each of finalizer function has access to result
+        :class:`~flask.Response` object ready to return to endpoint user.
+        For example, its possible to set custom headers to response::
 
             @apify.finalizer
             def set_custom_header(res):
