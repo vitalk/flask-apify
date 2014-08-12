@@ -22,7 +22,8 @@ def app():
     return app
 
 
-@pytest.fixture(params=['application/json', 'application/javascript', 'text/html'])
+@pytest.fixture(params=['application/json', 'application/javascript',
+                        'application/json-p', 'text/json-p', 'text/html'])
 def mimetype(request):
     return request.param
 
@@ -49,6 +50,8 @@ def test_apify_init(webapp, apify):
     assert isinstance(apify.serializers['text/html'], DebugSerializer)
     assert isinstance(apify.serializers['application/json'], JSONSerializer)
     assert isinstance(apify.serializers['application/javascript'], JSONPSerializer)
+    assert isinstance(apify.serializers['application/json-p'], JSONPSerializer)
+    assert isinstance(apify.serializers['text/json-p'], JSONPSerializer)
 
 
 def test_apify_does_not_require_app_object_while_instantiated(app, accept_mimetypes):

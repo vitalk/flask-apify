@@ -63,6 +63,8 @@ class Apify(object):
         'text/html': DebugSerializer(),
         'application/json': JSONSerializer(),
         'application/javascript': JSONPSerializer(),
+        'application/json-p': JSONPSerializer(),
+        'text/json-p': JSONPSerializer(),
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
