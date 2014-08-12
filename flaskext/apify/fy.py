@@ -27,8 +27,8 @@ from .utils import self_config_value
 from .exc import ApiError
 from .exc import ApiNotAcceptable
 
-from .serializers import to_json
-from .serializers import to_debug
+from .serializers import DebugSerializer
+from .serializers import JSONSerializer
 from .serializers import get_serializer
 from .serializers import get_default_serializer
 
@@ -59,9 +59,9 @@ class Apify(object):
 
     # the serializer function per mimetype
     serializers = {
-        'text/html': to_debug,
-        'application/json': to_json,
-        'application/javascript': to_json,
+        'text/html': DebugSerializer(),
+        'application/json': JSONSerializer(),
+        'application/javascript': JSONSerializer(),
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
