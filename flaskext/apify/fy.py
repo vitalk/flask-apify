@@ -153,16 +153,16 @@ class Apify(object):
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
 
-        :param mimetype: The mimetype to register function as a data serializer.
-        :param fn: The serializers function
-
-        Example::
+        Serializer is a callable which accept one argument the raw data
+        to process and returns serialized data::
 
             @apify.serializer('application/xml')
             def to_xml(data):
                 '''Converts data to xml.'''
-                pass
+                return data
 
+        :param mimetype: The mimetype to register function as a data serializer.
+        :param fn: The serializer callable
         """
         def wrapper(fn):
             self.serializers[mimetype] = fn
