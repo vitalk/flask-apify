@@ -29,6 +29,7 @@ from .exc import ApiNotAcceptable
 
 from .serializers import DebugSerializer
 from .serializers import JSONSerializer
+from .serializers import JSONPSerializer
 from .serializers import get_serializer
 from .serializers import get_default_serializer
 
@@ -61,7 +62,7 @@ class Apify(object):
     serializers = {
         'text/html': DebugSerializer(),
         'application/json': JSONSerializer(),
-        'application/javascript': JSONSerializer(),
+        'application/javascript': JSONPSerializer(),
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,

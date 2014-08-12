@@ -11,6 +11,7 @@ from flask.ext.apify.exc import ApiUnauthorized
 from flask.ext.apify.exc import ApiNotAcceptable
 from flask.ext.apify.serializers import DebugSerializer
 from flask.ext.apify.serializers import JSONSerializer
+from flask.ext.apify.serializers import JSONPSerializer
 from flask.ext.apify.serializers import get_serializer
 from flask.ext.apify.serializers import get_default_serializer
 
@@ -47,7 +48,7 @@ def test_apify_init(webapp, apify):
     assert apify.finalizer_funcs == []
     assert isinstance(apify.serializers['text/html'], DebugSerializer)
     assert isinstance(apify.serializers['application/json'], JSONSerializer)
-    assert isinstance(apify.serializers['application/javascript'], JSONSerializer)
+    assert isinstance(apify.serializers['application/javascript'], JSONPSerializer)
 
 
 def test_apify_does_not_require_app_object_while_instantiated(app, accept_mimetypes):

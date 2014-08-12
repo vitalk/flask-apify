@@ -54,3 +54,4 @@ def get_default_serializer():
 
 from .debug import DebugSerializer
 from .json import JSONSerializer
+from .jsonp import JSONPSerializer
