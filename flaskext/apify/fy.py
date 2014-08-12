@@ -27,11 +27,11 @@ from .utils import self_config_value
 from .exc import ApiError
 from .exc import ApiNotAcceptable
 
-from .serializers import DebugSerializer
-from .serializers import JSONSerializer
-from .serializers import JSONPSerializer
-from .serializers import get_serializer
 from .serializers import get_default_serializer
+from .serializers import get_serializer
+from .serializers import to_javascript
+from .serializers import to_json
+from .serializers import to_html
 
 
 default_config = ImmutableDict({
@@ -60,11 +60,11 @@ class Apify(object):
 
     # the serializer function per mimetype
     serializers = {
-        'text/html': DebugSerializer(),
-        'application/json': JSONSerializer(),
-        'application/javascript': JSONPSerializer(),
-        'application/json-p': JSONPSerializer(),
-        'text/json-p': JSONPSerializer(),
+        'text/html': to_html,
+        'application/json': to_json,
+        'application/javascript': to_javascript,
+        'application/json-p': to_javascript,
+        'text/json-p': to_javascript,
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,

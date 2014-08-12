@@ -28,3 +28,6 @@ class DebugSerializer(Serializer):
         """
         dump = json.dumps(raw, indent=2)
         return render_template(self_config_value('apidump_template'), dump=dump)
+
+
+to_html = DebugSerializer()

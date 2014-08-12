@@ -60,3 +60,6 @@ def jsonp(json, padding=None):
         before = padding + '('
         after = ');'
     return before + json + after
+
+
+to_javascript = JSONPSerializer()

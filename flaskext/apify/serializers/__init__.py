@@ -52,6 +52,6 @@ def get_default_serializer():
                 '"{}"'.format(mimetype))
 
 
-from .debug import DebugSerializer
-from .json import JSONSerializer
-from .jsonp import JSONPSerializer
+from .debug import to_html
+from .json import to_json
+from .jsonp import to_javascript

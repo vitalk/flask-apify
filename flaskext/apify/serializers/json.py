@@ -22,3 +22,6 @@ class JSONSerializer(Serializer):
         :param raw: The raw data to process.
         """
         return json.dumps(raw)
+
+
+to_json = JSONSerializer()

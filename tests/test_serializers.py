@@ -3,9 +3,9 @@
 import pytest
 
 from flask.ext.apify.serializers import Serializer
-from flask.ext.apify.serializers import JSONSerializer
-from flask.ext.apify.serializers import JSONPSerializer
-from flask.ext.apify.serializers import DebugSerializer
+from flask.ext.apify.serializers.debug import DebugSerializer
+from flask.ext.apify.serializers.json import JSONSerializer
+from flask.ext.apify.serializers.jsonp import JSONPSerializer
 from flask.ext.apify.serializers.jsonp import jsonp
 
 
