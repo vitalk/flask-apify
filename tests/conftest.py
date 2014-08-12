@@ -8,7 +8,7 @@ from flask.ext.apify import Apify
 
 def create_app(config):
     apify = Apify()
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../flaskext/apify/templates')
 
     for key, value in config:
         app.config[key] = value

@@ -4,6 +4,7 @@ import pytest
 
 from flask.ext.apify.serializers import Serializer
 from flask.ext.apify.serializers import JSONSerializer
+from flask.ext.apify.serializers import DebugSerializer
 
 
 class TestSerializer(object):
@@ -14,6 +15,16 @@ class TestSerializer(object):
     def test_base_class_raises_not_implementent_error_on_call(self):
         with pytest.raises(NotImplementedError):
             self.serializer({})
+
+
+class TestDebugSerializer(object):
+
+    def setup(self):
+        self.serializer = DebugSerializer()
+
+    def test_dump(self, webapp):
+        with webapp.test_request_context():
+            assert self.serializer(42) == '<pre>42</pre>'
 
 
 class TestJSONSerializer(object):
