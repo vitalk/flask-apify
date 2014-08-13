@@ -33,9 +33,10 @@ def accept_mimetypes(mimetype):
     return [('Accept', mimetype)]
 
 
-@pytest.fixture
-def accept_json():
-    return accept_mimetypes('application/json')
+@pytest.fixture(params=['application/json', 'application/javascript',
+                        'application/json-p', 'text/json-p'])
+def accept_json(request):
+    return accept_mimetypes(request.param)
 
 
 @pytest.fixture
