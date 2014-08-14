@@ -10,6 +10,18 @@
 """
 from flask import json
 
+from . import Serializer
 
-to_json = lambda x: json.dumps(x)
-"""The JSON serializer."""
+
+class JSONSerializer(Serializer):
+    """The JSON serializer."""
+
+    def __call__(self, raw):
+        """Dumps data to JSON.
+
+        :param raw: The raw data to process.
+        """
+        return json.dumps(raw)
+
+
+to_json = JSONSerializer()

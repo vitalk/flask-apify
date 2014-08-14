@@ -11,15 +11,20 @@
 from flask import current_app
 from werkzeug.local import LocalProxy
 
-from .json import to_json
-from .debug import to_debug
-
 from ..exc import ApiNotAcceptable
 from ..utils import self_config
 from ..utils import self_config_value
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
+
+
+class Serializer(object):
+    """Base class for data serializers."""
+
+    def __call__(self, data):
+        raise NotImplementedError('call method must be overriden '
+                                  'by subclasses')
 
 
 def get_serializer(mimetype):
@@ -45,3 +50,8 @@ def get_default_serializer():
         raise RuntimeError(\
                 'Serializer does not registered for mimetype '
                 '"{}"'.format(mimetype))
+
+
+from .debug import to_html
+from .json import to_json
+from .jsonp import to_javascript

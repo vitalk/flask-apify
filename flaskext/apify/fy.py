@@ -27,10 +27,11 @@ from .utils import self_config_value
 from .exc import ApiError
 from .exc import ApiNotAcceptable
 
-from .serializers import to_json
-from .serializers import to_debug
-from .serializers import get_serializer
 from .serializers import get_default_serializer
+from .serializers import get_serializer
+from .serializers import to_javascript
+from .serializers import to_json
+from .serializers import to_html
 
 
 default_config = ImmutableDict({
@@ -59,9 +60,11 @@ class Apify(object):
 
     # the serializer function per mimetype
     serializers = {
-        'text/html': to_debug,
+        'text/html': to_html,
         'application/json': to_json,
-        'application/javascript': to_json,
+        'application/javascript': to_javascript,
+        'application/json-p': to_javascript,
+        'text/json-p': to_javascript,
     }
 
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
@@ -153,16 +156,16 @@ class Apify(object):
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
 
-        :param mimetype: The mimetype to register function as a data serializer.
-        :param fn: The serializers function
-
-        Example::
+        Serializer is a callable which accept one argument the raw data
+        to process and returns serialized data::
 
             @apify.serializer('application/xml')
             def to_xml(data):
                 '''Converts data to xml.'''
-                pass
+                return data
 
+        :param mimetype: The mimetype to register function as a data serializer.
+        :param fn: The serializer callable
         """
         def wrapper(fn):
             self.serializers[mimetype] = fn

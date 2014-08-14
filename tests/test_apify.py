@@ -9,10 +9,11 @@ from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
 from flask.ext.apify.exc import ApiNotAcceptable
-from flask.ext.apify.serializers import to_json
-from flask.ext.apify.serializers import to_debug
-from flask.ext.apify.serializers import get_serializer
 from flask.ext.apify.serializers import get_default_serializer
+from flask.ext.apify.serializers import get_serializer
+from flask.ext.apify.serializers import to_javascript
+from flask.ext.apify.serializers import to_json
+from flask.ext.apify.serializers import to_html
 
 
 @pytest.fixture
@@ -21,7 +22,8 @@ def app():
     return app
 
 
-@pytest.fixture(params=['application/json', 'application/javascript', 'text/html'])
+@pytest.fixture(params=['application/json', 'application/javascript',
+                        'application/json-p', 'text/json-p', 'text/html'])
 def mimetype(request):
     return request.param
 
@@ -31,9 +33,10 @@ def accept_mimetypes(mimetype):
     return [('Accept', mimetype)]
 
 
-@pytest.fixture
-def accept_json():
-    return accept_mimetypes('application/json')
+@pytest.fixture(params=['application/json', 'application/javascript',
+                        'application/json-p', 'text/json-p'])
+def accept_json(request):
+    return accept_mimetypes(request.param)
 
 
 @pytest.fixture
@@ -45,9 +48,11 @@ def test_apify_init(webapp, apify):
     assert 'apify' in webapp.extensions
     assert apify.blueprint is not None
     assert apify.finalizer_funcs == []
-    assert apify.serializers['text/html'] is to_debug
+    assert apify.serializers['text/html'] is to_html
     assert apify.serializers['application/json'] is to_json
-    assert apify.serializers['application/javascript'] is to_json
+    assert apify.serializers['application/javascript'] is to_javascript
+    assert apify.serializers['application/json-p'] is to_javascript
+    assert apify.serializers['text/json-p'] is to_javascript
 
 
 def test_apify_does_not_require_app_object_while_instantiated(app, accept_mimetypes):
