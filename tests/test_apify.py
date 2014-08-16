@@ -161,7 +161,7 @@ def test_apify_can_handle_finalizer_error(apify, client, accept_mimetypes):
     assert 'Server too hot. Try it later.' in res.data
 
 
-def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_json):
+def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimetypes):
     @apify.preprocessor
     def rewrite_response(fn):
         def wrapper():
@@ -169,6 +169,6 @@ def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_json)
                                       mimetype='custom/mimetype')
         return wrapper
 
-    res = client.get(url_for('api.ping'), headers=accept_json)
+    res = client.get(url_for('api.ping'), headers=accept_mimetypes)
     assert res.mimetype == 'custom/mimetype'
     assert 'response has been rewritten' == res.data
