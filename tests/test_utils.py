@@ -19,16 +19,16 @@ def test_get_config():
     assert get_config(config_with_prefix, 'apify_') == config
 
 
-def test_self_config(webapp):
-    assert self_config(webapp) == {
+def test_self_config(app):
+    assert self_config(app) == {
         'APIDUMP_TEMPLATE': 'apidump.html',
         'DEFAULT_MIMETYPE': 'application/json',
     }
 
 
-def test_self_config_value(webapp):
-    assert self_config_value('apidump_template', webapp) == 'apidump.html'
-    assert self_config_value('default_mimetype', webapp) == 'application/json'
+def test_self_config_value(app):
+    assert self_config_value('apidump_template', app) == 'apidump.html'
+    assert self_config_value('default_mimetype', app) == 'application/json'
 
 
 def test_unpack_response():
