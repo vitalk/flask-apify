@@ -37,6 +37,8 @@ def accept_json(request):
 def test_apify_init(app, apify):
     assert 'apify' in app.extensions
     assert apify.blueprint is not None
+    assert apify.preprocessor_funcs == [set_best_serializer,]
+    assert apify.postprocessor_funcs == []
     assert apify.finalizer_funcs == []
     assert apify.serializers['text/html'] is to_html
     assert apify.serializers['application/json'] is to_json
