@@ -22,13 +22,13 @@ def test_get_config():
 def test_self_config(app):
     assert self_config(app) == {
         'APIDUMP_TEMPLATE': 'apidump.html',
-        'DEFAULT_MIMETYPE': 'application/json',
+        'DEFAULT_MIMETYPE': 'application/javascript',
     }
 
 
 def test_self_config_value(app):
     assert self_config_value('apidump_template', app) == 'apidump.html'
-    assert self_config_value('default_mimetype', app) == 'application/json'
+    assert self_config_value('default_mimetype', app) == 'application/javascript'
 
 
 def test_unpack_response():
