@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask import Flask
 from flask import url_for
 from flask import Response
-from flask.ext.apify import Apify
 from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
