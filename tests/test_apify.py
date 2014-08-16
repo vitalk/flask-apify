@@ -110,6 +110,19 @@ def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
     assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
+def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimetypes):
+    @apify.preprocessor
+    def rewrite_response(fn):
+        def wrapper():
+            return app.response_class('response has been rewritten',
+                                      mimetype='custom/mimetype')
+        return wrapper
+
+    res = client.get(url_for('api.ping'), headers=accept_mimetypes)
+    assert res.mimetype == 'custom/mimetype'
+    assert 'response has been rewritten' == res.data
+
+
 def test_apify_register_postprocessor(apify):
     @apify.postprocessor
     def my_postprocessor():
@@ -159,16 +172,3 @@ def test_apify_can_handle_finalizer_error(apify, client, accept_mimetypes):
     res = client.get(url_for('api.ping'), headers=accept_mimetypes)
     assert res.status == '418 I\'M A TEAPOT'
     assert 'Server too hot. Try it later.' in res.data
-
-
-def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimetypes):
-    @apify.preprocessor
-    def rewrite_response(fn):
-        def wrapper():
-            return app.response_class('response has been rewritten',
-                                      mimetype='custom/mimetype')
-        return wrapper
-
-    res = client.get(url_for('api.ping'), headers=accept_mimetypes)
-    assert res.mimetype == 'custom/mimetype'
-    assert 'response has been rewritten' == res.data
