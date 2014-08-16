@@ -34,11 +34,6 @@ def accept_json(request):
     return accept_mimetypes(request.param)
 
 
-@pytest.fixture
-def dummyfn():
-    return lambda x: x
-
-
 def test_apify_init(app, apify):
     assert 'apify' in app.extensions
     assert apify.blueprint is not None
@@ -55,12 +50,14 @@ def test_apify_does_not_require_app_object_while_instantiated(client, accept_mim
     assert res.status_code == 200
 
 
-def test_apify_register_serializer_for_mimetype(app, apify, dummyfn):
-    apify.serializer('application/xml')(dummyfn)
+def test_apify_register_serializer_for_mimetype(app, apify):
+    @apify.serializer('application/xml')
+    def to_xml(x):
+        return x
 
     mimetype, serializer = get_serializer('application/xml')
     assert mimetype == 'application/xml'
-    assert serializer is dummyfn
+    assert serializer is to_xml
 
 
 def test_apify_get_serializer(app, mimetype):
@@ -109,9 +106,12 @@ def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_js
     assert '{"value": 404}' == res.data
 
 
-def test_apify_add_preprocessor(apify, dummyfn):
-    apify.preprocessor(dummyfn)
-    assert dummyfn in apify.preprocessor_funcs
+def test_apify_add_preprocessor(apify):
+    @apify.preprocessor
+    def my_preprocessor():
+        pass
+
+    assert my_preprocessor in apify.preprocessor_funcs
 
 
 def test_apify_add_function_to_set_best_serializer_as_default_preprocessor(apify):
@@ -128,9 +128,12 @@ def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
     assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
-def test_apify_register_postprocessor(apify, dummyfn):
-    apify.postprocessor(dummyfn)
-    assert dummyfn in apify.postprocessor_funcs
+def test_apify_register_postprocessor(apify):
+    @apify.postprocessor
+    def my_postprocessor():
+        pass
+
+    assert my_postprocessor in apify.postprocessor_funcs
 
 
 def test_apify_exec_postprocessor(apify, client, accept_json):
@@ -144,10 +147,12 @@ def test_apify_exec_postprocessor(apify, client, accept_json):
     assert res.data == '{"something": 42, "value": 200}'
 
 
-def test_apify_add_finalizer(apify, dummyfn):
-    apify.finalizer(dummyfn)
-    assert dummyfn in apify.finalizer_funcs
+def test_apify_add_finalizer(apify):
+    @apify.finalizer
+    def teardown():
+        pass
 
+    assert teardown in apify.finalizer_funcs
 
 
 def test_apify_exec_finalizer(apify, client, accept_mimetypes):
