@@ -17,23 +17,6 @@ from flask.ext.apify.serializers import to_json
 from flask.ext.apify.serializers import to_html
 
 
-@pytest.fixture(params=['application/json', 'application/javascript',
-                        'application/json-p', 'text/json-p', 'text/html'])
-def mimetype(request):
-    return request.param
-
-
-@pytest.fixture
-def accept_mimetypes(mimetype):
-    return [('Accept', mimetype)]
-
-
-@pytest.fixture(params=['application/json', 'application/javascript',
-                        'application/json-p', 'text/json-p'])
-def accept_json(request):
-    return accept_mimetypes(request.param)
-
-
 def test_apify_init(app, apify):
     assert 'apify' in app.extensions
     assert apify.blueprint is not None
