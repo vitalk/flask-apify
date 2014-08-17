@@ -3,6 +3,7 @@
 import pytest
 
 from flask import url_for
+from flask.ext.apify.fy import guess_best_mimetype
 from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
 from flask.ext.apify.exc import ApiUnauthorized
@@ -12,6 +13,8 @@ from flask.ext.apify.serializers import get_serializer
 from flask.ext.apify.serializers import to_javascript
 from flask.ext.apify.serializers import to_json
 from flask.ext.apify.serializers import to_html
+
+from .conftest import accept_mimetypes
 
 
 def test_apify_init(app, apify):
@@ -86,6 +89,36 @@ def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_js
     res = client.get(url_for('api.ping', value=404), headers=accept_json)
     assert res.status == '200 OK'
     assert '{"value": 404}' == res.data
+
+
+@pytest.mark.usefixtures('apify')
+class TestMimetypeDetection(object):
+
+    def test_wildcards_support(self, app):
+        with app.test_request_context(headers=accept_mimetypes('*/*')):
+            assert guess_best_mimetype() == 'text/html'
+
+    def test_select_mimetype_with_better_quality_when_multiple_choices(self, app):
+        accept_headers = accept_mimetypes('application/javascript; q=1,'
+                                          'application/json; q=0.9')
+        with app.test_request_context(headers=accept_headers):
+            assert guess_best_mimetype() == 'application/javascript'
+
+    def test_invalid_accept_header(self, app):
+        with app.test_request_context(headers=accept_mimetypes('*/json')):
+            assert guess_best_mimetype() is None
+
+    def test_not_acceptable_mimetype(self, app):
+        with app.test_request_context(headers=accept_mimetypes('text/xml')):
+            assert guess_best_mimetype() is None
+
+    def test_respect_available_mimetypes(self, app, apify):
+        @apify.serializer('text/xml')
+        def to_xml(x):
+            return x
+
+        with app.test_request_context(headers=accept_mimetypes('text/xml')):
+            assert guess_best_mimetype() == 'text/xml'
 
 
 def test_apify_add_preprocessor(apify):
