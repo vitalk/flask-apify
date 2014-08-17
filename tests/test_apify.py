@@ -94,8 +94,8 @@ def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_js
 @pytest.mark.usefixtures('apify')
 class TestMimetypeDetection(object):
 
-    def test_wildcards_support(self, app):
-        with app.test_request_context(headers=accept_mimetypes('*/*')):
+    def test_support_wildcards(self, app, accept_any):
+        with app.test_request_context(headers=accept_any):
             assert guess_best_mimetype() == 'text/html'
 
     def test_select_mimetype_with_better_quality_when_multiple_choices(self, app):
