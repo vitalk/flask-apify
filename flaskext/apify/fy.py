@@ -312,8 +312,23 @@ def set_best_serializer(fn):
 
 
 def guess_best_mimetype():
-    """Returns the best mimetype that client may accept."""
-    return request.accept_mimetypes.best
+    """Returns the best mimetype that client may accept. If client may receive
+    any mimetype then returns the default one.
+    """
+    def _normalize(x):
+        x = x.lower()
+        return ('*', '*') if x == '*' else x.split('/', 1)
+
+    def_mimetype = self_config_value('default_mimetype')
+    def_type, def_subtype = _normalize(def_mimetype)
+
+    for value in request.accept_mimetypes.values():
+        value_type, value_subtype = _normalize(value)
+        if (value_type == value_subtype == '*') or \
+           (value_type == def_type and value_subtype == '*' ):
+            return def_mimetype
+
+    return request.accept_mimetypes.best_match(_apify.serializers.keys())
 
 
 def make_api_response(raw):
