@@ -96,7 +96,20 @@ class TestMimetypeDetection(object):
 
     def test_support_wildcards(self, app, accept_any):
         with app.test_request_context(headers=accept_any):
-            assert guess_best_mimetype() == 'text/html'
+            assert guess_best_mimetype() == 'application/json'
+
+    @pytest.mark.app(apify_default_mimetype='text/xml')
+    def test_returns_default_mimetype_if_client_may_accept_any_mimetype(self, app, accept_any):
+        with app.test_request_context(headers=accept_any):
+            assert guess_best_mimetype() == 'text/xml'
+
+    @pytest.mark.app(apify_default_mimetype='application/xml')
+    def test_wildcard_in_subtype(self, app):
+        accept_headers = accept_mimetypes('application/*; q=0.1,'
+                                          'application/json; q=1,'
+                                          'application/javascript')
+        with app.test_request_context(headers=accept_headers):
+            assert guess_best_mimetype() == 'application/xml'
 
     def test_select_mimetype_with_better_quality_when_multiple_choices(self, app):
         accept_headers = accept_mimetypes('application/javascript; q=1,'
