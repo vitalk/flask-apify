@@ -18,14 +18,27 @@ def create_app(**options):
 
 @pytest.fixture
 def app(request):
-    """During tests execution application has pushed context, e.g. `url_for`,
+    """Use `pytest.mark.app` decorator to pass options to your application
+    factory::
+
+        @pytest.mark.app(apify_default_mimetype='text/xml')
+        def test_something(app):
+            pass
+
+    During tests execution application has pushed context, e.g. `url_for`,
     `session`, etc. can be used in tests as is::
 
         def test_app(app, client):
             assert client.get(url_for('view')).status_code == 200
 
     """
-    app = create_app()
+    options = {}
+
+    # Update application options from pytest environment
+    if 'app' in request.keywords:
+        options.update(request.keywords['app'].kwargs)
+
+    app = create_app(**options)
     apify = Apify()
 
     @apify.route('/ping')
