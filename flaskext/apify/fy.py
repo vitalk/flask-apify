@@ -313,7 +313,7 @@ def set_best_serializer(fn):
 
 def guess_best_mimetype():
     """Returns the best mimetype that client may accept."""
-    return request.accept_mimetypes.best
+    return request.accept_mimetypes.best_match(_apify.serializers.keys())
 
 
 def make_api_response(raw):
