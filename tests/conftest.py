@@ -10,7 +10,7 @@ from flask.ext.apify.exc import ApiError
 def create_app(config):
     app = Flask(__name__, template_folder='../flaskext/apify/templates')
 
-    for key, value in config:
+    for key, value in config.items():
         app.config[key] = value
 
     return app
