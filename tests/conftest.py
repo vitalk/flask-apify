@@ -7,7 +7,7 @@ from flask.ext.apify import Apify
 from flask.ext.apify.exc import ApiError
 
 
-def create_app(config):
+def create_app(**config):
     app = Flask(__name__, template_folder='../flaskext/apify/templates')
 
     for key, value in config.items():
@@ -25,7 +25,7 @@ def app(request):
             assert client.get(url_for('view')).status_code == 200
 
     """
-    app = create_app({})
+    app = create_app()
     apify = Apify()
 
     @apify.route('/ping')
