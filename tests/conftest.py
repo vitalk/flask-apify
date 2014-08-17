@@ -11,7 +11,7 @@ def create_app(**options):
     app = Flask(__name__, template_folder='../flaskext/apify/templates')
 
     for key, value in options.items():
-        app.config[key] = value
+        app.config[key.upper()] = value
 
     return app
 
