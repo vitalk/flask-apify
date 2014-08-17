@@ -84,3 +84,8 @@ def accept_mimetypes(mimetype):
                         'application/json-p', 'text/json-p'])
 def accept_json(request):
     return accept_mimetypes(request.param)
+
+
+@pytest.fixture(params=['*', '*/*'])
+def accept_any(request):
+    return accept_mimetypes(request.param)
