@@ -142,6 +142,14 @@ def test_apify_add_preprocessor(apify):
     assert my_preprocessor in apify.preprocessor_funcs
 
 
+def test_default_function_argument_in_preprocessor(apify):
+    @apify.preprocessor()
+    def my_preprocessor():
+        pass
+
+    assert my_preprocessor in apify.preprocessor_funcs
+
+
 def test_apify_add_function_to_set_best_serializer_as_default_preprocessor(apify):
     assert set_best_serializer in apify.preprocessor_funcs
 

@@ -172,7 +172,7 @@ class Apify(object):
             return fn
         return wrapper
 
-    def preprocessor(self, fn):
+    def preprocessor(self, fn=None):
         """Register a function to decorate original view function.
 
         :param fn: A view decorator
@@ -184,8 +184,12 @@ class Apify(object):
                 raise ApiUnauthorized()
 
         """
-        self.preprocessor_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.preprocessor_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
     def postprocessor(self, fn):
         """Register a function as request postprocessor.
