@@ -212,6 +212,14 @@ def test_apify_add_finalizer(apify):
     assert teardown in apify.finalizer_funcs
 
 
+def test_default_function_argument_in_finalizer(apify):
+    @apify.finalizer()
+    def teardown():
+        pass
+
+    assert teardown in apify.finalizer_funcs
+
+
 def test_apify_exec_finalizer(apify, client, accept_mimetypes):
     @apify.finalizer
     def set_custom_header(res):

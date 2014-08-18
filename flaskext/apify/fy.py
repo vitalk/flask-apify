@@ -212,7 +212,7 @@ class Apify(object):
             return decorator
         return decorator(fn)
 
-    def finalizer(self, fn):
+    def finalizer(self, fn=None):
         """Register a function to run after :class:`~flask.Response` object is
         created.
 
@@ -227,8 +227,12 @@ class Apify(object):
                 res.headers['X-Rate-Limit'] = 42
 
         """
-        self.finalizer_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.finalizer_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
 
 def catch_errors(*errors):
