@@ -56,9 +56,9 @@ def test_apify_get_serializer_may_raise_error(app):
         get_serializer('nosuch/mimetype')
 
 
-def test_apify_default_response_mimetype_is_application_json(app):
+def test_apify_default_response_mimetype_is_application_javascript(app):
     mimetype, fn = get_default_serializer()
-    assert mimetype == 'application/json'
+    assert mimetype == 'application/javascript'
     assert callable(fn)
 
 
@@ -72,7 +72,7 @@ def test_apify_get_default_serializer_may_raise_error_if_nosuch_serializer(app):
 def test_apify_call_require_explicit_mimetype(app, client):
     res = client.get(url_for('api.ping'))
     assert res.status == '406 NOT ACCEPTABLE'
-    assert res.mimetype == 'application/json'
+    assert res.mimetype == 'application/javascript'
 
 
 def test_apify_handle_custom_errors(client, accept_mimetypes):
@@ -96,7 +96,7 @@ class TestMimetypeDetection(object):
 
     def test_support_wildcards(self, app, accept_any):
         with app.test_request_context(headers=accept_any):
-            assert guess_best_mimetype() == 'application/json'
+            assert guess_best_mimetype() == 'application/javascript'
 
     @pytest.mark.app(apify_default_mimetype='text/xml')
     def test_returns_default_mimetype_if_client_may_accept_any_mimetype(self, app, accept_any):
@@ -112,10 +112,10 @@ class TestMimetypeDetection(object):
             assert guess_best_mimetype() == 'application/xml'
 
     def test_select_mimetype_with_better_quality_when_multiple_choices(self, app):
-        accept_headers = accept_mimetypes('application/javascript; q=1,'
-                                          'application/json; q=0.9')
+        accept_headers = accept_mimetypes('application/javascript; q=0.9,'
+                                          'application/json; q=1')
         with app.test_request_context(headers=accept_headers):
-            assert guess_best_mimetype() == 'application/javascript'
+            assert guess_best_mimetype() == 'application/json'
 
     def test_invalid_accept_header(self, app):
         with app.test_request_context(headers=accept_mimetypes('*/json')):

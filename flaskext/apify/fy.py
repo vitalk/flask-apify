@@ -36,7 +36,7 @@ from .serializers import to_html
 
 default_config = ImmutableDict({
     # The default mimetype returned by API endpoints
-    'default_mimetype': 'application/json',
+    'default_mimetype': 'application/javascript',
 
     # The name of the jinja template rendered on debug view
     'apidump_template': 'apidump.html',
