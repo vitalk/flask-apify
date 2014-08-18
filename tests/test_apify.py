@@ -185,6 +185,14 @@ def test_apify_register_postprocessor(apify):
     assert my_postprocessor in apify.postprocessor_funcs
 
 
+def test_default_function_argument_in_postprocessor(apify):
+    @apify.postprocessor()
+    def my_postprocessor():
+        pass
+
+    assert my_postprocessor in apify.postprocessor_funcs
+
+
 def test_apify_exec_postprocessor(apify, client, accept_json):
     @apify.postprocessor
     def attach_something(raw):

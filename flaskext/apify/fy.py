@@ -191,7 +191,7 @@ class Apify(object):
             return decorator
         return decorator(fn)
 
-    def postprocessor(self, fn):
+    def postprocessor(self, fn=None):
         """Register a function as request postprocessor.
 
         :param fn: A request postprocessor function.
@@ -205,8 +205,12 @@ class Apify(object):
                 return raw, code, headers
 
         """
-        self.postprocessor_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.postprocessor_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
     def finalizer(self, fn):
         """Register a function to run after :class:`~flask.Response` object is
