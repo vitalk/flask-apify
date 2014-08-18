@@ -147,10 +147,37 @@ class Apify(object):
         """
         def wrapper(fn):
             if not hasattr(fn, 'is_api_method'):
-                fn = catch_errors(ApiError)(fn)
+                fn = self.dispatch_api_request(fn)
                 fn.is_api_method = True
             self.blueprint.add_url_rule(rule, view_func=fn, **options)
             return fn
+        return wrapper
+
+    def dispatch_api_request(self, fn):
+        """Does the request dispatching. On top of that performs request pre and
+        postprocessing as well as exception catching and error handling.
+
+        :param fn: The view callable.
+        """
+        @wraps(fn)
+        @catch_errors(ApiError)
+        def wrapper(*args, **kwargs):
+            # Call preprocessor functions
+            func = apply_all(self.preprocessor_funcs, fn)
+
+            # Call view callable
+            raw = func(*args, **kwargs)
+
+            # Call postprocessor functions
+            raw = apply_all(self.postprocessor_funcs, raw)
+
+            # Make a response object
+            res = make_api_response(raw)
+
+            # Finalize response
+            res = apply_all(self.finalizer_funcs, res)
+
+            return res
         return wrapper
 
     def serializer(self, mimetype):
@@ -256,20 +283,7 @@ def catch_errors(*errors):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                # Call preprocessor functions
-                func = apply_all(_apify.preprocessor_funcs, fn)
-
-                # Call view callable
-                raw = func(*args, **kwargs)
-
-                # Call postprocessor functions
-                raw = apply_all(_apify.postprocessor_funcs, raw)
-
-                # Make a response object
-                res = make_api_response(raw)
-
-                # Finalize response
-                return apply_all(_apify.finalizer_funcs, res)
+                return fn(*args, **kwargs)
             except errors as exc:
                 return send_api_error(exc)
         return wrapper
