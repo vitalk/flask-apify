@@ -172,7 +172,7 @@ class Apify(object):
             return fn
         return wrapper
 
-    def preprocessor(self, fn):
+    def preprocessor(self, fn=None):
         """Register a function to decorate original view function.
 
         :param fn: A view decorator
@@ -184,10 +184,14 @@ class Apify(object):
                 raise ApiUnauthorized()
 
         """
-        self.preprocessor_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.preprocessor_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
-    def postprocessor(self, fn):
+    def postprocessor(self, fn=None):
         """Register a function as request postprocessor.
 
         :param fn: A request postprocessor function.
@@ -201,10 +205,14 @@ class Apify(object):
                 return raw, code, headers
 
         """
-        self.postprocessor_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.postprocessor_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
-    def finalizer(self, fn):
+    def finalizer(self, fn=None):
         """Register a function to run after :class:`~flask.Response` object is
         created.
 
@@ -219,8 +227,12 @@ class Apify(object):
                 res.headers['X-Rate-Limit'] = 42
 
         """
-        self.finalizer_funcs.append(fn)
-        return fn
+        def decorator(fn):
+            self.finalizer_funcs.append(fn)
+            return fn
+        if fn is None:
+            return decorator
+        return decorator(fn)
 
 
 def catch_errors(*errors):
