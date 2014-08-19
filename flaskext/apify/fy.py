@@ -160,7 +160,7 @@ class Apify(object):
         :param fn: The view callable.
         """
         @wraps(fn)
-        @catch_errors(ApiError)
+        @catch_errors(ApiError, errorhandler=send_api_error)
         def wrapper(*args, **kwargs):
             # Call preprocessor functions
             func = apply_all(self.preprocessor_funcs, fn)
@@ -262,30 +262,31 @@ class Apify(object):
         return decorator(fn)
 
 
-def catch_errors(*errors):
-    """The decorator to catch errors raised inside the decorated function.
+def catch_errors(errors, errorhandler):
+    """The decorator to catch errors raised inside the decorated function and
+    pass them to specified error handler.
 
     Uses in :meth:`route` of :class:`Apify` object to produce nice output for
     view errors and exceptions.
 
     :param errors: The errors to catch up
+    :param errorhandler: The function which handles the error if occurs
     :param fn: The view function to decorate
 
     Example::
 
-        @catch_errors(ApiError)
+        @catch_errors(ApiError, errorhandler=reraise)
         def may_raise_error():
             raise ApiError('Too busy. Try later.')
 
     """
     def decorator(fn):
-        assert errors, 'Some dumbas forgot to specify errors to catch?'
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
                 return fn(*args, **kwargs)
             except errors as exc:
-                return send_api_error(exc)
+                return errorhandler(exc)
         return wrapper
     return decorator
 
