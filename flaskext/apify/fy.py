@@ -160,7 +160,7 @@ class Apify(object):
         :param fn: The view callable.
         """
         @wraps(fn)
-        @catch_errors(ApiError, errorhandler=send_api_error)
+        @catch_errors(ApiError, errorhandler=self.send_api_error)
         def wrapper(*args, **kwargs):
             # Call preprocessor functions
             func = apply_all(self.preprocessor_funcs, fn)
@@ -179,6 +179,17 @@ class Apify(object):
 
             return res
         return wrapper
+
+    def send_api_error(self, exc):
+        """Returns the API error wrapped in response object.
+
+        :param exc: The exception raised
+        """
+        raw = {
+            'error': exc.name,
+            'message': exc.description,
+        }
+        return make_api_response((raw, exc.code))
 
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
@@ -373,16 +384,6 @@ def make_api_response(raw):
     return res
 
 
-def send_api_error(exc):
-    """Returns the API error wrapped in response object.
-
-    :param exc: The exception raised
-    """
-    raw = {
-        'error': exc.name,
-        'message': exc.description,
-    }
-    return make_api_response((raw, exc.code))
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
