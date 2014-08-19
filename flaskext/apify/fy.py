@@ -160,7 +160,7 @@ class Apify(object):
         :param fn: The view callable.
         """
         @wraps(fn)
-        @catch_errors(ApiError, errorhandler=self.send_api_error)
+        @catch_errors(ApiError, errorhandler=self.handle_api_exception)
         def wrapper(*args, **kwargs):
             # Call preprocessor functions
             func = apply_all(self.preprocessor_funcs, fn)
@@ -180,8 +180,9 @@ class Apify(object):
             return res
         return wrapper
 
-    def send_api_error(self, exc):
-        """Returns the API error wrapped in response object.
+    def handle_api_exception(self, exc):
+        """Handles an API exception. By default this returns the exception as
+        response object.
 
         :param exc: The exception raised
         """
