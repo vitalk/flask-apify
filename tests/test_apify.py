@@ -3,6 +3,7 @@
 import pytest
 
 from flask import url_for
+from flask.ext.apify.fy import catch_errors
 from flask.ext.apify.fy import guess_best_mimetype
 from flask.ext.apify.fy import set_best_serializer
 from flask.ext.apify.exc import ApiError
@@ -89,6 +90,33 @@ def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_js
     res = client.get(url_for('api.ping', value=404), headers=accept_json)
     assert res.status == '200 OK'
     assert '{"value": 404}' == res.data
+
+
+class TestCatchErrorsDecorator(object):
+
+    def test_catch_error(self):
+        @catch_errors(ValueError, errorhandler=lambda x: x)
+        def raise_error(value):
+            raise ValueError
+
+        assert raise_error('What is the meaning of the Life?')
+
+    def test_may_catch_multiple_errors(self):
+        @catch_errors((ValueError, ZeroDivisionError), lambda x: x)
+        def raise_error(value):
+            if value == 0:
+                raise ZeroDivisionError
+            raise ValueError
+
+        assert raise_error(0)
+        assert raise_error(42)
+
+    def test_exec_errorhandler(self):
+        @catch_errors(ValueError, errorhandler=lambda x: int(x.message))
+        def raise_error(value):
+            raise ValueError('42')
+
+        assert raise_error('What is the meaning of the Life?') == 42
 
 
 @pytest.mark.usefixtures('apify')
