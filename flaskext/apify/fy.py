@@ -154,8 +154,9 @@ class Apify(object):
         return wrapper
 
     def dispatch_api_request(self, fn):
-        """Does the request dispatching. On top of that performs request pre and
-        postprocessing as well as exception catching and error handling.
+        """Decorator uses to create a function which does the request
+        dispatching. On top of that performs request pre and postprocessing
+        as well as exception catching and error handling.
 
         :param fn: The view callable.
         """
