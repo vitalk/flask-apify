@@ -386,6 +386,4 @@ def make_api_response(raw):
     return res
 
 
-
-
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
