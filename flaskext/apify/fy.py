@@ -182,9 +182,12 @@ class Apify(object):
         return wrapper
 
     def make_api_response(self, raw):
-        """Returns the valid response object.
+        """Creates the response object from value returned by a view callable.
 
-        :param raw: The raw data to send
+        The `raw` may be a tuple in the form ``(raw, status_code, headers)``
+        or ``(raw, status_code)``.
+
+        :param raw: The raw data from view callable.
         """
         if isinstance(raw, _Response):
             return raw
