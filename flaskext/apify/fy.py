@@ -173,13 +173,27 @@ class Apify(object):
             raw = apply_all(self.postprocessor_funcs, raw)
 
             # Make a response object
-            res = make_api_response(raw)
+            res = self.make_api_response(raw)
 
             # Finalize response
             res = apply_all(self.finalizer_funcs, res)
 
             return res
         return wrapper
+
+    def make_api_response(self, raw):
+        """Returns the valid response object.
+
+        :param raw: The raw data to send
+        """
+        if isinstance(raw, _Response):
+            return raw
+
+        raw, code, headers = unpack_response(raw)
+
+        res = Response(g.api_serializer(raw), headers=headers, mimetype=g.api_mimetype)
+        res.status_code = code
+        return res
 
     def handle_api_exception(self, exc):
         """Handles an API exception. By default this returns the exception as
@@ -191,7 +205,7 @@ class Apify(object):
             'error': exc.name,
             'message': exc.description,
         }
-        return make_api_response((raw, exc.code))
+        return self.make_api_response((raw, exc.code))
 
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
@@ -369,21 +383,6 @@ def guess_best_mimetype():
             return def_mimetype
 
     return request.accept_mimetypes.best_match(_apify.serializers.keys())
-
-
-def make_api_response(raw):
-    """Returns the valid response object.
-
-    :param raw: The raw data to send
-    """
-    if isinstance(raw, _Response):
-        return raw
-
-    raw, code, headers = unpack_response(raw)
-
-    res = Response(g.api_serializer(raw), headers=headers, mimetype=g.api_mimetype)
-    res.status_code = code
-    return res
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
