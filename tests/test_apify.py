@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pytest
+import logging
 
 from flask import url_for
 from flask.ext.apify.fy import catch_errors
@@ -102,6 +103,59 @@ def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_js
     res = client.get(url_for('api.ping', value=404), headers=accept_json)
     assert res.status == '200 OK'
     assert '{"value": 404}' == res.data
+
+
+@pytest.fixture
+def stdout():
+    import sys
+    if sys.version_info[0] == 2:
+        from cStringIO import StringIO
+    else:
+        from io import StringIO
+
+    return StringIO()
+
+
+@pytest.fixture
+def app_logger(app, stdout):
+    app.logger.level = logging.ERROR
+    app.logger.addHandler(logging.StreamHandler(stdout))
+
+
+@pytest.mark.usefixtures('app_logger')
+class TestLogging(object):
+
+    def test_log_exception(self, app, apify, stdout):
+        with app.test_request_context('/foo'):
+            try:
+                1 // 0
+            except ZeroDivisionError as exc:
+                apify.log_exception(exc)
+                err = stdout.getvalue()
+
+                # Request path and method
+                assert 'Exception on GET /foo' in err
+                # Exception traceback
+                assert 'Traceback (most recent call last):' in err
+                # Erroneous expression
+                assert '1 // 0' in err
+                # Exception itself
+                assert 'ZeroDivisionError:' in err
+
+    def test_http_exception_logging(self, app, client, stdout, accept_any):
+        app.logger.level = logging.INFO
+        client.get(url_for('api.forbidden'), headers=accept_any)
+
+        err = stdout.getvalue()
+        assert 'Exception on GET /forbidden' in err
+        assert '403: Forbidden' in err
+
+    def test_exception_logging(self, app, client, stdout, accept_any):
+        res = client.get(url_for('api.bomb'), headers=accept_any)
+
+        err = stdout.getvalue()
+        assert 'Exception on GET /bomb' in err
+        assert 'Bomb:' in err
 
 
 class TestCatchErrorsDecorator(object):
