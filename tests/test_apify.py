@@ -88,6 +88,12 @@ def test_apify_handle_http_exceptions(client, accept_mimetypes):
     assert "the permission to access the requested resource" in res.data
 
 
+def test_returns_server_error_if_exception_has_no_status_code(client, accept_mimetypes):
+    res = client.get(url_for('api.bomb'), headers=accept_mimetypes)
+    assert res.status_code == 500
+    assert 'boom!' in res.data
+
+
 def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_json):
     res = client.get(url_for('api.ping'), headers=accept_json)
     assert res.status == '200 OK'

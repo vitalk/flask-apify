@@ -59,6 +59,13 @@ def app(request):
     def forbidden():
         abort(403)
 
+    @apify.route('/bomb')
+    def bomb():
+        class Bomb(ApiError):
+            description = "boom!"
+
+        raise Bomb()
+
     apify.init_app(app)
     app.register_blueprint(apify.blueprint)
 

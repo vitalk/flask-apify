@@ -206,6 +206,13 @@ class Apify(object):
 
         :param exc: The exception raised
         """
+        # Force set status code of the exception to 500 if exception
+        # does not provides that value explicitly. This also set exception
+        # name to more useful value, e.g. "Internal Server Error"
+        # instead of "Unknown Error".
+        if exc.code is None:
+            exc.code = 500
+
         raw = {
             'error': exc.name,
             'message': exc.description,
