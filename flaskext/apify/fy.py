@@ -20,6 +20,7 @@ from werkzeug.local import LocalProxy
 from werkzeug.wrappers import Response as _Response
 from werkzeug.datastructures import ImmutableDict
 
+from . import http
 from .utils import key
 from .utils import unpack_response
 from .utils import self_config_value
@@ -211,17 +212,38 @@ class Apify(object):
         # does not provides that value explicitly. This also set exception
         # name to more useful value, e.g. "Internal Server Error"
         # instead of "Unknown Error".
-        if exc.code is None:
-            exc.code = 500
+        status_code = exc.code
+        if status_code is None:
+            exc.code = status_code = 500
 
         payload = {
             'error': exc.name,
             'message': exc.description,
         }
-        return self.make_api_response((payload, exc.code))
+
+        self.log_exception(exc)
+        return self.make_api_response((payload, status_code))
 
     handle_http_exception = handle_api_exception
     """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
+
+    def log_exception(self, exc_info):
+        """Logs an exception via the application logger. If exception is a
+        server error or does not contain status code explicitly, then the
+        exception logged as error and as info otherwise.
+
+        :param exc_info: The exception to log.
+        """
+        status_code = getattr(exc_info, 'code', 500)
+        if http.status.is_server_error(status_code):
+            logger_func = current_app.logger.error
+        else:
+            logger_func = current_app.logger.info
+
+        logger_func('Exception on %s %s' % (
+            request.method,
+            request.path
+        ), exc_info=exc_info)
 
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
