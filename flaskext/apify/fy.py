@@ -194,9 +194,9 @@ class Apify(object):
         if isinstance(raw, _Response):
             return raw
 
-        raw, code, headers = unpack_response(raw)
+        payload, code, headers = unpack_response(raw)
 
-        res = Response(g.api_serializer(raw), headers=headers, mimetype=g.api_mimetype)
+        res = Response(g.api_serializer(payload), headers=headers, mimetype=g.api_mimetype)
         res.status_code = code
         return res
 
@@ -213,11 +213,11 @@ class Apify(object):
         if exc.code is None:
             exc.code = 500
 
-        raw = {
+        payload = {
             'error': exc.name,
             'message': exc.description,
         }
-        return self.make_api_response((raw, exc.code))
+        return self.make_api_response((payload, exc.code))
 
     handle_http_exception = handle_api_exception
     """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
