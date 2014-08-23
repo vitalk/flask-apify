@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from flask import abort
 from flask import Flask
 from flask.ext.apify import Apify
 from flask.ext.apify.exc import ApiError
@@ -53,6 +54,10 @@ def app(request):
             description = 'This server is a teapot, not a coffee machine'
 
         raise ImATeapot
+
+    @apify.route('/forbidden')
+    def forbidden():
+        abort(403)
 
     apify.init_app(app)
     app.register_blueprint(apify.blueprint)

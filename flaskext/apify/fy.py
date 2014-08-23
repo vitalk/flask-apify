@@ -26,6 +26,7 @@ from .utils import self_config_value
 
 from .exc import ApiError
 from .exc import ApiNotAcceptable
+from .exc import HTTPException
 
 from .serializers import get_default_serializer
 from .serializers import get_serializer
@@ -161,6 +162,7 @@ class Apify(object):
         :param fn: The view callable.
         """
         @wraps(fn)
+        @catch_errors(HTTPException, errorhandler=self.handle_http_exception)
         @catch_errors(ApiError, errorhandler=self.handle_api_exception)
         def wrapper(*args, **kwargs):
             # Call preprocessor functions
@@ -209,6 +211,9 @@ class Apify(object):
             'message': exc.description,
         }
         return self.make_api_response((raw, exc.code))
+
+    handle_http_exception = handle_api_exception
+    """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
 
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.

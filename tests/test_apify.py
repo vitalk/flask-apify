@@ -82,6 +82,12 @@ def test_apify_handle_custom_errors(client, accept_mimetypes):
     assert 'This server is a teapot, not a coffee machine' in res.data
 
 
+def test_apify_handle_http_exceptions(client, accept_mimetypes):
+    res = client.get(url_for('api.forbidden'), headers=accept_mimetypes)
+    assert res.status_code == 403
+    assert "the permission to access the requested resource" in res.data
+
+
 def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_json):
     res = client.get(url_for('api.ping'), headers=accept_json)
     assert res.status == '200 OK'
