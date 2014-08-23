@@ -195,8 +195,9 @@ class Apify(object):
             return raw
 
         payload, code, headers = unpack_response(raw)
+        payload, mimetype = g.api_serializer(payload), g.api_mimetype
 
-        res = Response(g.api_serializer(payload), headers=headers, mimetype=g.api_mimetype)
+        res = Response(payload, headers=headers, mimetype=mimetype)
         res.status_code = code
         return res
 
