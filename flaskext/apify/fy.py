@@ -13,11 +13,9 @@ from itertools import chain
 
 from flask import g
 from flask import request
-from flask import Response
 from flask import Blueprint
 from flask import current_app
 from werkzeug.local import LocalProxy
-from werkzeug.wrappers import Response as _Response
 from werkzeug.datastructures import ImmutableDict
 
 from . import http
@@ -191,13 +189,17 @@ class Apify(object):
 
         :param raw: The raw data from view callable.
         """
-        if isinstance(raw, _Response):
+        response_class = current_app.response_class
+
+        # If view function or postprocessor creates a valid response object
+        # then no need to create it again, just return what we've got.
+        if isinstance(raw, response_class):
             return raw
 
         payload, code, headers = unpack_response(raw)
         payload, mimetype = g.api_serializer(payload), g.api_mimetype
 
-        res = Response(payload, headers=headers, mimetype=mimetype)
+        res = response_class(payload, headers=headers, mimetype=mimetype)
         res.status_code = code
         return res
 
