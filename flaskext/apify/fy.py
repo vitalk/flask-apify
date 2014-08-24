@@ -20,12 +20,14 @@ from werkzeug.local import LocalProxy
 from werkzeug.wrappers import Response as _Response
 from werkzeug.datastructures import ImmutableDict
 
+from . import http
 from .utils import key
 from .utils import unpack_response
 from .utils import self_config_value
 
 from .exc import ApiError
 from .exc import ApiNotAcceptable
+from .exc import HTTPException
 
 from .serializers import get_default_serializer
 from .serializers import get_serializer
@@ -147,11 +149,101 @@ class Apify(object):
         """
         def wrapper(fn):
             if not hasattr(fn, 'is_api_method'):
-                fn = catch_errors(ApiError)(fn)
+                fn = self.dispatch_api_request(fn)
                 fn.is_api_method = True
             self.blueprint.add_url_rule(rule, view_func=fn, **options)
             return fn
         return wrapper
+
+    def dispatch_api_request(self, fn):
+        """Decorator uses to create a function which does the request
+        dispatching. On top of that performs request pre and postprocessing
+        as well as exception catching and error handling.
+
+        :param fn: The view callable.
+        """
+        @wraps(fn)
+        @catch_errors(HTTPException, errorhandler=self.handle_http_exception)
+        @catch_errors(ApiError, errorhandler=self.handle_api_exception)
+        def wrapper(*args, **kwargs):
+            # Call preprocessor functions
+            func = apply_all(self.preprocessor_funcs, fn)
+
+            # Call view callable
+            raw = func(*args, **kwargs)
+
+            # Call postprocessor functions
+            raw = apply_all(self.postprocessor_funcs, raw)
+
+            # Make a response object
+            res = self.make_api_response(raw)
+
+            # Finalize response
+            res = apply_all(self.finalizer_funcs, res)
+
+            return res
+        return wrapper
+
+    def make_api_response(self, raw):
+        """Creates the response object from value returned by a view callable.
+
+        The `raw` may be a tuple in the form ``(raw, status_code, headers)``
+        or ``(raw, status_code)``.
+
+        :param raw: The raw data from view callable.
+        """
+        if isinstance(raw, _Response):
+            return raw
+
+        payload, code, headers = unpack_response(raw)
+        payload, mimetype = g.api_serializer(payload), g.api_mimetype
+
+        res = Response(payload, headers=headers, mimetype=mimetype)
+        res.status_code = code
+        return res
+
+    def handle_api_exception(self, exc):
+        """Handles an API exception. By default this returns the exception as
+        response object.
+
+        :param exc: The exception raised
+        """
+        # Force set status code of the exception to 500 if exception
+        # does not provides that value explicitly. This also set exception
+        # name to more useful value, e.g. "Internal Server Error"
+        # instead of "Unknown Error".
+        status_code = exc.code
+        if status_code is None:
+            exc.code = status_code = 500
+
+        payload = {
+            'error': exc.name,
+            'message': exc.description,
+        }
+
+        self.log_exception(exc)
+        return self.make_api_response((payload, status_code))
+
+    handle_http_exception = handle_api_exception
+    """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
+
+    def log_exception(self, exc_info):
+        """Logs an exception via the application logger. If exception is a
+        server error or does not contain status code explicitly, then the
+        exception logged as error and as info otherwise.
+
+        :param exc_info: The exception to log.
+        """
+        status_code = getattr(exc_info, 'code', 500)
+        if http.status.is_server_error(status_code):
+            logger_func = current_app.logger.error
+        else:
+            logger_func = current_app.logger.info
+
+        logger_func('Exception on %s %s' % (
+            request.method,
+            request.path
+        ), exc_info=exc_info)
 
     def serializer(self, mimetype):
         """Register decorated function as serializer for specific mimetype.
@@ -235,43 +327,31 @@ class Apify(object):
         return decorator(fn)
 
 
-def catch_errors(*errors):
-    """The decorator to catch errors raised inside the decorated function.
+def catch_errors(errors, errorhandler):
+    """The decorator to catch errors raised inside the decorated function and
+    pass them to specified error handler.
 
     Uses in :meth:`route` of :class:`Apify` object to produce nice output for
     view errors and exceptions.
 
     :param errors: The errors to catch up
+    :param errorhandler: The function which handles the error if occurs
     :param fn: The view function to decorate
 
     Example::
 
-        @catch_errors(ApiError)
+        @catch_errors(ApiError, errorhandler=reraise)
         def may_raise_error():
             raise ApiError('Too busy. Try later.')
 
     """
     def decorator(fn):
-        assert errors, 'Some dumbas forgot to specify errors to catch?'
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
-                # Call preprocessor functions
-                func = apply_all(_apify.preprocessor_funcs, fn)
-
-                # Call view callable
-                raw = func(*args, **kwargs)
-
-                # Call postprocessor functions
-                raw = apply_all(_apify.postprocessor_funcs, raw)
-
-                # Make a response object
-                res = make_api_response(raw)
-
-                # Finalize response
-                return apply_all(_apify.finalizer_funcs, res)
+                return fn(*args, **kwargs)
             except errors as exc:
-                return send_api_error(exc)
+                return errorhandler(exc)
         return wrapper
     return decorator
 
@@ -341,33 +421,6 @@ def guess_best_mimetype():
             return def_mimetype
 
     return request.accept_mimetypes.best_match(_apify.serializers.keys())
-
-
-def make_api_response(raw):
-    """Returns the valid response object.
-
-    :param raw: The raw data to send
-    """
-    if isinstance(raw, _Response):
-        return raw
-
-    raw, code, headers = unpack_response(raw)
-
-    res = Response(g.api_serializer(raw), headers=headers, mimetype=g.api_mimetype)
-    res.status_code = code
-    return res
-
-
-def send_api_error(exc):
-    """Returns the API error wrapped in response object.
-
-    :param exc: The exception raised
-    """
-    raw = {
-        'error': exc.name,
-        'message': exc.description,
-    }
-    return make_api_response((raw, exc.code))
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])
