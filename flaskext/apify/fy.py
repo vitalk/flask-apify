@@ -72,6 +72,7 @@ class Apify(object):
     def __init__(self, app=None, blueprint_name='api', url_prefix=None,
                  preprocessor_funcs=None, postprocessor_funcs=None,
                  finalizer_funcs=None):
+        self.app = app
 
         # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
@@ -108,8 +109,6 @@ class Apify(object):
             apify.init_app(app)
 
         """
-        self.app = app
-
         for k, v in default_config.iteritems():
             app.config.setdefault(key(k), v)
 
