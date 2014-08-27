@@ -66,6 +66,11 @@ def app(request):
 
         raise Bomb()
 
+    @apify.route('/rewrite_response')
+    def rewrite_response():
+        return app.response_class('response has been rewritten',
+                                  mimetype='custom/mimetype')
+
     apify.init_app(app)
     app.register_blueprint(apify.blueprint)
 
