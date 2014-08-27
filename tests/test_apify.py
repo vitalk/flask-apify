@@ -258,6 +258,12 @@ def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
     assert "The server could not verify that you are authorized to access the requested URL." in res.data
 
 
+def test_view_callable_may_rewrite_response_object(client, accept_mimetypes):
+    res = client.get(url_for('api.rewrite_response'), headers=accept_mimetypes)
+    assert res.mimetype == 'custom/mimetype'
+    assert res.data == 'response has been rewritten'
+
+
 def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimetypes):
     @apify.preprocessor
     def rewrite_response(fn):
