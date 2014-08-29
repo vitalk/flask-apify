@@ -76,6 +76,10 @@ class Apify(object):
         # A logger instance uses to log errors and exceptions occurred during
         # request dispatching.
         self.logger = logging.getLogger('flask-apify')
+        class NullHandler(logging.StreamHandler):
+            def emit(*_):
+                pass
+        self.logger.addHandler(NullHandler())
 
         # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
