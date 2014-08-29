@@ -47,6 +47,21 @@ default_config = ImmutableDict({
 class Apify(object):
     """The Flask extension to create an API to your application as a ninja.
 
+    Extension has a :attr:`logger` instance to log errors or exceptions
+    occurred during request dispatching. That logger is by default not
+    configured with an any handler. You can easy add your own handler to
+    obtain log messages emitted by extension::
+
+        api = Apify(app)
+        api.logger.addHandler(StreamHandler())
+
+    Or reuse the handlers from your application::
+
+        app = Flask(__name__)
+        api = Apify(app)
+        for handler in app.logger.handlers:
+            api.logger.addHandler(handler)
+
     :param app: Flask application instance
     :param blueprint_name: A name of the blueprint created, also uses to make a
         URLs via :func:`url_for` calls
