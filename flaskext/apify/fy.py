@@ -8,6 +8,7 @@
 
     :copyright: (c) by Vital Kudzelka
 """
+import logging
 from functools import wraps
 from itertools import chain
 
@@ -71,6 +72,10 @@ class Apify(object):
                  preprocessor_funcs=None, postprocessor_funcs=None,
                  finalizer_funcs=None):
         self.app = app
+
+        # A logger instance uses to log errors and exceptions occurred during
+        # request dispatching.
+        self.logger = logging.getLogger('flask-apify')
 
         # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
@@ -229,17 +234,17 @@ class Apify(object):
     """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
 
     def log_exception(self, exc_info):
-        """Logs an exception via the application logger. If exception is a
-        server error or does not contain status code explicitly, then the
-        exception logged as error and as info otherwise.
+        """Logs an exception to the configured :attr:`logger` instance.
+        If exception is a server error or does not contain status code
+        explicitly, then the exception logged as error and as info otherwise.
 
         :param exc_info: The exception to log.
         """
         status_code = getattr(exc_info, 'code', 500)
         if http.status.is_server_error(status_code):
-            logger_func = current_app.logger.error
+            logger_func = self.logger.error
         else:
-            logger_func = current_app.logger.info
+            logger_func = self.logger.info
 
         logger_func('Exception on %s %s' % (
             request.method,
