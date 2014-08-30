@@ -8,6 +8,7 @@
 
     :copyright: (c) by Vital Kudzelka
 """
+import logging
 from functools import wraps
 from itertools import chain
 
@@ -46,6 +47,21 @@ default_config = ImmutableDict({
 class Apify(object):
     """The Flask extension to create an API to your application as a ninja.
 
+    Extension has a :attr:`logger` instance to log errors or exceptions
+    occurred during request dispatching. That logger is by default not
+    configured with an any handler. You can easy add your own handler to
+    obtain log messages emitted by extension::
+
+        api = Apify(app)
+        api.logger.addHandler(StreamHandler())
+
+    Or reuse the handlers from your application::
+
+        app = Flask(__name__)
+        api = Apify(app)
+        for handler in app.logger.handlers:
+            api.logger.addHandler(handler)
+
     :param app: Flask application instance
     :param blueprint_name: A name of the blueprint created, also uses to make a
         URLs via :func:`url_for` calls
@@ -71,6 +87,14 @@ class Apify(object):
                  preprocessor_funcs=None, postprocessor_funcs=None,
                  finalizer_funcs=None):
         self.app = app
+
+        # A logger instance uses to log errors and exceptions occurred during
+        # request dispatching.
+        self.logger = logging.getLogger('flask-apify')
+        class NullHandler(logging.StreamHandler):
+            def emit(*_):
+                pass
+        self.logger.addHandler(NullHandler())
 
         # A list of functions that should decorate original view callable. To
         # register a function here, use the :meth:`preprocessor` decorator.
@@ -229,17 +253,17 @@ class Apify(object):
     """Handles an HTTP exception. Alias to :meth:`handle_api_exception`."""
 
     def log_exception(self, exc_info):
-        """Logs an exception via the application logger. If exception is a
-        server error or does not contain status code explicitly, then the
-        exception logged as error and as info otherwise.
+        """Logs an exception to the configured :attr:`logger` instance.
+        If exception is a server error or does not contain status code
+        explicitly, then the exception logged as error and as info otherwise.
 
         :param exc_info: The exception to log.
         """
         status_code = getattr(exc_info, 'code', 500)
         if http.status.is_server_error(status_code):
-            logger_func = current_app.logger.error
+            logger_func = self.logger.error
         else:
-            logger_func = current_app.logger.info
+            logger_func = self.logger.info
 
         logger_func('Exception on %s %s' % (
             request.method,

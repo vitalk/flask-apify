@@ -22,6 +22,7 @@ from .conftest import accept_mimetypes
 def test_apify_init(app, apify):
     assert 'apify' in app.extensions
     assert apify.blueprint is not None
+    assert apify.logger is logging.getLogger('flask-apify')
     assert apify.preprocessor_funcs == [set_best_serializer,]
     assert apify.postprocessor_funcs == []
     assert apify.finalizer_funcs == []
@@ -117,9 +118,9 @@ def stdout():
 
 
 @pytest.fixture
-def app_logger(app, stdout):
-    app.logger.level = logging.ERROR
-    app.logger.addHandler(logging.StreamHandler(stdout))
+def app_logger(apify, stdout):
+    apify.logger.level = logging.ERROR
+    apify.logger.addHandler(logging.StreamHandler(stdout))
 
 
 @pytest.mark.usefixtures('app_logger')
@@ -142,15 +143,15 @@ class TestLogging(object):
                 # Exception itself
                 assert 'ZeroDivisionError:' in err
 
-    def test_http_exception_logging(self, app, client, stdout, accept_any):
-        app.logger.level = logging.INFO
+    def test_http_exception_logging(self, apify, client, stdout, accept_any):
+        apify.logger.level = logging.INFO
         client.get(url_for('api.forbidden'), headers=accept_any)
 
         err = stdout.getvalue()
         assert 'Exception on GET /forbidden' in err
         assert '403: Forbidden' in err
 
-    def test_exception_logging(self, app, client, stdout, accept_any):
+    def test_exception_logging(self, client, stdout, accept_any):
         res = client.get(url_for('api.bomb'), headers=accept_any)
 
         err = stdout.getvalue()
