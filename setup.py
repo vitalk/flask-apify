@@ -26,7 +26,7 @@ setup(
     namespace_packages=['flaskext'],
     install_requires=['Flask'],
     tests_require=['pytest'],
-    test_suite='pytest',
+    test_suite='tests',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
