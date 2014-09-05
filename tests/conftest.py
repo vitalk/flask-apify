@@ -33,13 +33,7 @@ def app(request):
             assert client.get(url_for('view')).status_code == 200
 
     """
-    options = {}
-
-    # Update application options from pytest environment
-    if 'app' in request.keywords:
-        options.update(request.keywords['app'].kwargs)
-
-    app = create_app(**options)
+    app = create_app()
     apify = Apify()
 
     @apify.route('/ping')
@@ -74,24 +68,7 @@ def app(request):
     apify.init_app(app)
     app.register_blueprint(apify.blueprint)
 
-    ctx = app.test_request_context()
-    ctx.push()
-
-    def teardown():
-        ctx.pop()
-
-    request.addfinalizer(teardown)
     return app
-
-
-@pytest.fixture
-def config(app):
-    return app.config
-
-
-@pytest.fixture
-def client(app):
-    return app.test_client()
 
 
 @pytest.fixture
@@ -113,9 +90,4 @@ def accept_mimetypes(mimetype):
 @pytest.fixture(params=['application/json', 'application/javascript',
                         'application/json-p', 'text/json-p'])
 def accept_json(request):
-    return accept_mimetypes(request.param)
-
-
-@pytest.fixture(params=['*', '*/*'])
-def accept_any(request):
     return accept_mimetypes(request.param)
