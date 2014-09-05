@@ -23,7 +23,7 @@ class pytest(test):
 
 setup(
     name='flask-apify',
-    version='0.6.3',
+    version='0.6.4',
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
