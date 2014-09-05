@@ -8,7 +8,17 @@
 
     :copyright: (c) by Vital Kudzelka
 """
+import sys
 from setuptools import setup
+from setuptools.command.test import test
+
+
+class pytest(test):
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
 
 
 setup(
@@ -27,6 +37,9 @@ setup(
     install_requires=['Flask'],
     tests_require=['pytest'],
     test_suite='tests',
+    cmdclass={
+        'test': pytest
+    },
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
