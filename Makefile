@@ -11,7 +11,7 @@ clean:
 
 
 test:
-	@py.test tests
+	@python setup.py test -q
 
 
 install:
