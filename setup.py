@@ -35,7 +35,7 @@ setup(
     ],
     namespace_packages=['flaskext'],
     install_requires=['Flask'],
-    tests_require=['pytest', 'pytest-flask'],
+    tests_require=['pytest-flask', 'pytest'],
     test_suite='tests',
     cmdclass={
         'test': pytest
