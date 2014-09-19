@@ -23,7 +23,7 @@ class pytest(test):
 
 setup(
     name='flask-apify',
-    version='0.6.4',
+    version='0.6.5',
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
@@ -35,7 +35,7 @@ setup(
     ],
     namespace_packages=['flaskext'],
     install_requires=['Flask'],
-    tests_require=['pytest'],
+    tests_require=['pytest-flask', 'pytest'],
     test_suite='tests',
     cmdclass={
         'test': pytest
