@@ -9,3 +9,5 @@
     :copyright: (c) by Vital Kudzelka
 """
 from .fy import Apify
+
+__version__ = '0.6.5'
