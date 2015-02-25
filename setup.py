@@ -8,9 +8,30 @@
 
     :copyright: (c) by Vital Kudzelka
 """
+import io
+import os
+import re
 import sys
 from setuptools import setup
 from setuptools.command.test import test
+
+
+def read(*parts):
+    """Reads the content of the file created from *parts*."""
+    try:
+        with io.open(os.path.join(*parts), 'r', encoding='utf-8') as f:
+            return f.read()
+    except IOError:
+        return ''
+
+
+def get_version():
+    version_file = read('flaskext', 'apify', '__init__.py')
+    version_match = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]',
+                              version_file, re.MULTILINE)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError('Unable to find version string.')
 
 
 class pytest(test):
@@ -23,7 +44,7 @@ class pytest(test):
 
 setup(
     name='flask-apify',
-    version='0.6.5',
+    version=get_version(),
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
