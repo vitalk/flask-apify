@@ -1,0 +1,17 @@
+language: python
+
+python:
+  - 2.6
+  - 2.7
+  - 3.3
+  - 3.4
+  - pypy
+
+install:
+  - pip install -q -r requirements.txt
+  - pip install -q pytest-flask
+  - pip install -q -e .
+
+script:
+  - py.test tests
+
