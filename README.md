@@ -10,8 +10,8 @@ Quickstart
 from itertools import count
 
 from flask import Flask, request
-from flask.ext.apify import Apify
-from flask.ext.apify.exc import ApiNotFound
+from flask_apify import Apify
+from flask_apify.exc import ApiNotFound
 
 
 app = Flask(__name__)

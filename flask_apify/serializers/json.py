@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-    flask.ext.apify.serializers.json
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    flask_apify.serializers.json
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The JSON serializer for an API response.
 

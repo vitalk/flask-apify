@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask.ext.apify.utils import key
-from flask.ext.apify.utils import get_config
-from flask.ext.apify.utils import self_config
-from flask.ext.apify.utils import self_config_value
-from flask.ext.apify.utils import unpack_response
+from flask_apify.utils import key
+from flask_apify.utils import get_config
+from flask_apify.utils import self_config
+from flask_apify.utils import self_config_value
+from flask_apify.utils import unpack_response
 
 
 def test_key():

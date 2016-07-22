@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.http
-    ~~~~~~~~~~~~~~~~~~~~
+    flask_apify.http
+    ~~~~~~~~~~~~~~~~
 
     Contains utilities to work with HTTP status codes.
 

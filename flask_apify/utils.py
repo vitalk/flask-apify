@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.utils
-    ~~~~~~~~~~~~~~~~~~~~~
+    flask_apify.utils
+    ~~~~~~~~~~~~~~~~~
 
     The helper functions.
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.fy
-    ~~~~~~~~~~~~~~~~~~
+    flask_apify.fy
+    ~~~~~~~~~~~~~~
 
     The extension core.
 
@@ -124,7 +124,7 @@ class Apify(object):
         Example::
 
             from flask import Flask
-            from flask.ext.apify import Apify
+            from flask_apify import Apify
 
             app = Flask(__name__)
             apify = Apify()

@@ -4,17 +4,17 @@ import pytest
 import logging
 
 from flask import url_for
-from flask.ext.apify.fy import catch_errors
-from flask.ext.apify.fy import guess_best_mimetype
-from flask.ext.apify.fy import set_best_serializer
-from flask.ext.apify.exc import ApiError
-from flask.ext.apify.exc import ApiUnauthorized
-from flask.ext.apify.exc import ApiNotAcceptable
-from flask.ext.apify.serializers import get_default_serializer
-from flask.ext.apify.serializers import get_serializer
-from flask.ext.apify.serializers import to_javascript
-from flask.ext.apify.serializers import to_json
-from flask.ext.apify.serializers import to_html
+from flask_apify.fy import catch_errors
+from flask_apify.fy import guess_best_mimetype
+from flask_apify.fy import set_best_serializer
+from flask_apify.exc import ApiError
+from flask_apify.exc import ApiUnauthorized
+from flask_apify.exc import ApiNotAcceptable
+from flask_apify.serializers import get_default_serializer
+from flask_apify.serializers import get_serializer
+from flask_apify.serializers import to_javascript
+from flask_apify.serializers import to_json
+from flask_apify.serializers import to_html
 
 from .conftest import accept_mimetypes
 
@@ -186,7 +186,6 @@ class TestCatchErrorsDecorator(object):
         assert raise_error('What is the meaning of the Life?') == 42
 
 
-@pytest.mark.usefixtures('apify')
 class TestMimetypeDetection(object):
 
     def test_support_wildcards(self, app, accept_any):

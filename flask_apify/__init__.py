@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify
-    ~~~~~~~~~~~~~~~
+    flask_apify
+    ~~~~~~~~~~~
 
     A Flask extension to create an API to your application as a ninja.
 

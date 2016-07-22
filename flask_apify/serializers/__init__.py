@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.serializers
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    flask_apify.serializers
+    ~~~~~~~~~~~~~~~~~~~~~~~
 
     Implements serializers for an application API.
 
