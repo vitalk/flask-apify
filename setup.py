@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask-apify
+    Flask-Apify
     ~~~~~~~~~~~
 
     A Flask extension to create an API to your application as a ninja.
@@ -45,7 +45,7 @@ class pytest(test):
 
 
 setup(
-    name='flask-apify',
+    name='Flask-Apify',
     version=get_version(),
     license='MIT',
     author='Vital Kudzelka',
