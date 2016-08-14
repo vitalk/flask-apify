@@ -50,6 +50,7 @@ setup(
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
+    url='https://github.com/vitalk/flask-apify',
     description='A Flask extension to create API to your application as a ninja',
     long_description=__doc__,
     packages=find_packages(exclude=['tests']),
