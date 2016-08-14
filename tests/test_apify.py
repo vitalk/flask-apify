@@ -192,12 +192,12 @@ class TestMimetypeDetection(object):
         with app.test_request_context(headers=accept_any):
             assert guess_best_mimetype() == 'application/javascript'
 
-    @pytest.mark.app(apify_default_mimetype='text/xml')
+    @pytest.mark.options(apify_default_mimetype='text/xml')
     def test_returns_default_mimetype_if_client_may_accept_any_mimetype(self, app, accept_any):
         with app.test_request_context(headers=accept_any):
             assert guess_best_mimetype() == 'text/xml'
 
-    @pytest.mark.app(apify_default_mimetype='application/xml')
+    @pytest.mark.options(apify_default_mimetype='application/xml')
     def test_wildcard_in_subtype(self, app):
         accept_headers = accept_mimetypes('application/*; q=0.1,'
                                           'application/json; q=1,'
