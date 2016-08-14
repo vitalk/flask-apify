@@ -4,17 +4,15 @@ import pytest
 import logging
 
 from flask import url_for
-from flask_apify.fy import catch_errors
-from flask_apify.fy import guess_best_mimetype
-from flask_apify.fy import set_best_serializer
-from flask_apify.exc import ApiError
-from flask_apify.exc import ApiUnauthorized
-from flask_apify.exc import ApiNotAcceptable
-from flask_apify.serializers import get_default_serializer
-from flask_apify.serializers import get_serializer
-from flask_apify.serializers import to_javascript
-from flask_apify.serializers import to_json
-from flask_apify.serializers import to_html
+from flask_apify.fy import (
+    catch_errors, guess_best_mimetype, set_best_serializer
+)
+from flask_apify.exc import (
+    ApiError, ApiUnauthorized, ApiNotAcceptable
+)
+from flask_apify.serializers import (
+    get_default_serializer, get_serializer, to_javascript, to_json, to_html
+)
 
 from .conftest import accept_mimetypes
 

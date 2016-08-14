@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask import abort
-from flask import Flask
+from flask import (
+    abort, Flask
+)
 from flask_apify import Apify
 from flask_apify.exc import ApiError
 

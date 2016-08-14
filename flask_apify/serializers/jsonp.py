@@ -8,9 +8,9 @@
 
     :copyright: (c) by Vital Kudzelka.
 """
-from flask import json
-from flask import request
-from flask import current_app
+from flask import (
+    current_app, json, request
+)
 from werkzeug.local import LocalProxy
 
 from . import Serializer

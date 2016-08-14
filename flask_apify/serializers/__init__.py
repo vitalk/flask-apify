@@ -12,8 +12,9 @@ from flask import current_app
 from werkzeug.local import LocalProxy
 
 from ..exc import ApiNotAcceptable
-from ..utils import self_config
-from ..utils import self_config_value
+from ..utils import (
+    self_config, self_config_value
+)
 
 
 _apify = LocalProxy(lambda: current_app.extensions['apify'])

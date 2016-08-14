@@ -12,27 +12,22 @@ import logging
 from functools import wraps
 from itertools import chain
 
-from flask import g
-from flask import request
-from flask import Blueprint
-from flask import current_app
+from flask import (
+    current_app, g, request, Blueprint
+)
 from werkzeug.local import LocalProxy
 from werkzeug.datastructures import ImmutableDict
 
 from . import http
-from .utils import key
-from .utils import unpack_response
-from .utils import self_config_value
-
-from .exc import ApiError
-from .exc import ApiNotAcceptable
-from .exc import HTTPException
-
-from .serializers import get_default_serializer
-from .serializers import get_serializer
-from .serializers import to_javascript
-from .serializers import to_json
-from .serializers import to_html
+from .utils import (
+    key, unpack_response, self_config_value
+)
+from .exc import (
+    ApiError, ApiNotAcceptable, HTTPException
+)
+from .serializers import (
+    get_default_serializer, get_serializer, to_javascript, to_json, to_html
+)
 
 
 default_config = ImmutableDict({
