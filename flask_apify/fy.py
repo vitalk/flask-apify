@@ -131,7 +131,7 @@ class Apify(object):
             apify.init_app(app)
 
         """
-        for k, v in default_config.iteritems():
+        for k, v in default_config.items():
             app.config.setdefault(key(k), v)
 
         app.extensions = getattr(app, 'extensions', {})

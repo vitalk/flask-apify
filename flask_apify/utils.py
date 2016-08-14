@@ -22,7 +22,7 @@ def get_config(config, prefix):
     :param prefix: The prefix to strip from keys of the original config
     """
     strip = lambda x: x.replace(prefix, '')
-    return {strip(k): v for k, v in config.iteritems() if k.startswith(prefix)}
+    return {strip(k): v for k, v in config.items() if k.startswith(prefix)}
 
 
 self_config = lambda app: get_config(app.config, 'APIFY_')
