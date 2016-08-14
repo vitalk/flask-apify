@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 import pytest
 import logging
 
@@ -15,6 +16,17 @@ from flask_apify.serializers import (
 )
 
 from .conftest import accept_mimetypes
+
+
+PY2 = sys.version_info[0] == 2
+if PY2:
+    text_type = unicode
+else:
+    text_type = str
+
+
+def b(s):
+    return s.encode('utf-8') if isinstance(s, text_type) else s
 
 
 def test_apify_init(app, apify):
@@ -72,36 +84,36 @@ def test_apify_get_default_serializer_may_raise_error_if_nosuch_serializer(app):
 
 def test_apify_call_require_explicit_mimetype(app, client):
     res = client.get(url_for('api.ping'))
-    assert res.status == '406 NOT ACCEPTABLE'
+    assert res.status_code == 406
     assert res.mimetype == 'application/javascript'
 
 
 def test_apify_handle_custom_errors(client, accept_mimetypes):
     res = client.get(url_for('api.error'), headers=accept_mimetypes)
     assert res.status_code == 418
-    assert 'This server is a teapot, not a coffee machine' in res.data
+    assert b('This server is a teapot, not a coffee machine') in res.data
 
 
 def test_apify_handle_http_exceptions(client, accept_mimetypes):
     res = client.get(url_for('api.forbidden'), headers=accept_mimetypes)
     assert res.status_code == 403
-    assert "the permission to access the requested resource" in res.data
+    assert b('the permission to access the requested resource') in res.data
 
 
 def test_returns_server_error_if_exception_has_no_status_code(client, accept_mimetypes):
     res = client.get(url_for('api.bomb'), headers=accept_mimetypes)
     assert res.status_code == 500
-    assert 'boom!' in res.data
+    assert b('boom!') in res.data
 
 
 def test_apify_allow_apply_route_decorator_multiple_times(app, client, accept_json):
     res = client.get(url_for('api.ping'), headers=accept_json)
-    assert res.status == '200 OK'
-    assert '{"value": 200}' == res.data
+    assert res.status_code == 200
+    assert res.json == {'value': 200}
 
     res = client.get(url_for('api.ping', value=404), headers=accept_json)
-    assert res.status == '200 OK'
-    assert '{"value": 404}' == res.data
+    assert res.status_code == 200
+    assert res.json == {'value': 404}
 
 
 @pytest.fixture
@@ -177,9 +189,9 @@ class TestCatchErrorsDecorator(object):
         assert raise_error(42)
 
     def test_exec_errorhandler(self):
-        @catch_errors(ValueError, errorhandler=lambda x: int(x.message))
+        @catch_errors(ValueError, errorhandler=lambda x: 42)
         def raise_error(value):
-            raise ValueError('42')
+            raise ValueError
 
         assert raise_error('What is the meaning of the Life?') == 42
 
@@ -252,14 +264,15 @@ def test_apify_exec_preprocessors(apify, client, accept_mimetypes):
         raise ApiUnauthorized()
 
     res = client.get(url_for('api.ping'), headers=accept_mimetypes)
-    assert res.status == '401 UNAUTHORIZED'
-    assert "The server could not verify that you are authorized to access the requested URL." in res.data
+    assert res.status_code == 401
+    assert b('The server could not verify that you are '
+             'authorized to access the requested URL.') in res.data
 
 
 def test_view_callable_may_rewrite_response_object(client, accept_mimetypes):
     res = client.get(url_for('api.rewrite_response'), headers=accept_mimetypes)
     assert res.mimetype == 'custom/mimetype'
-    assert res.data == 'response has been rewritten'
+    assert res.data == b('response has been rewritten')
 
 
 def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimetypes):
@@ -272,7 +285,7 @@ def test_preprocessor_may_rewrite_view_response(app, apify, client, accept_mimet
 
     res = client.get(url_for('api.ping'), headers=accept_mimetypes)
     assert res.mimetype == 'custom/mimetype'
-    assert 'response has been rewritten' == res.data
+    assert res.data == b('response has been rewritten')
 
 
 def test_apify_register_postprocessor(apify):
@@ -298,8 +311,8 @@ def test_apify_exec_postprocessor(apify, client, accept_json):
         return raw
 
     res = client.get(url_for('api.ping'), headers=accept_json)
-    assert res.status == '200 OK'
-    assert res.data == '{"something": 42, "value": 200}'
+    assert res.status_code == 200
+    assert res.json == {'something': 42, 'value': 200}
 
 
 def test_apify_add_finalizer(apify):
@@ -325,7 +338,7 @@ def test_apify_exec_finalizer(apify, client, accept_mimetypes):
         return res
 
     res = client.get(url_for('api.ping'), headers=accept_mimetypes)
-    assert res.status == '200 OK'
+    assert res.status_code == 200
     assert res.headers['X-Rate-Limit'] == '42'
 
 
@@ -338,5 +351,5 @@ def test_apify_can_handle_finalizer_error(apify, client, accept_mimetypes):
         raise ImATeapot('Server too hot. Try it later.')
 
     res = client.get(url_for('api.ping'), headers=accept_mimetypes)
-    assert res.status == '418 I\'M A TEAPOT'
-    assert 'Server too hot. Try it later.' in res.data
+    assert res.status_code == 418
+    assert b('Server too hot. Try it later.') in res.data
