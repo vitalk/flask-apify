@@ -9,8 +9,9 @@
 
     :copyright: (c) by Vital Kudzelka
 """
-from flask import json
-from flask import render_template
+from flask import (
+    json, render_template
+)
 
 from . import Serializer
 from ..utils import self_config_value

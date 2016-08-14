@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.exc
-    ~~~~~~~~~~~~~~~~~~~
+    flask_apify.exc
+    ~~~~~~~~~~~~~~~
 
     The errors and exceptions that application API may produce.
 

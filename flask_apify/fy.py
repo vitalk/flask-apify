@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.fy
-    ~~~~~~~~~~~~~~~~~~
+    flask_apify.fy
+    ~~~~~~~~~~~~~~
 
     The extension core.
 
@@ -12,27 +12,22 @@ import logging
 from functools import wraps
 from itertools import chain
 
-from flask import g
-from flask import request
-from flask import Blueprint
-from flask import current_app
+from flask import (
+    current_app, g, request, Blueprint
+)
 from werkzeug.local import LocalProxy
 from werkzeug.datastructures import ImmutableDict
 
 from . import http
-from .utils import key
-from .utils import unpack_response
-from .utils import self_config_value
-
-from .exc import ApiError
-from .exc import ApiNotAcceptable
-from .exc import HTTPException
-
-from .serializers import get_default_serializer
-from .serializers import get_serializer
-from .serializers import to_javascript
-from .serializers import to_json
-from .serializers import to_html
+from .utils import (
+    key, unpack_response, self_config_value
+)
+from .exc import (
+    ApiError, ApiNotAcceptable, HTTPException
+)
+from .serializers import (
+    get_default_serializer, get_serializer, to_javascript, to_json, to_html
+)
 
 
 default_config = ImmutableDict({
@@ -124,14 +119,14 @@ class Apify(object):
         Example::
 
             from flask import Flask
-            from flask.ext.apify import Apify
+            from flask_apify import Apify
 
             app = Flask(__name__)
             apify = Apify()
             apify.init_app(app)
 
         """
-        for k, v in default_config.iteritems():
+        for k, v in default_config.items():
             app.config.setdefault(key(k), v)
 
         app.extensions = getattr(app, 'extensions', {})

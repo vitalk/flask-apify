@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask.ext.apify import http
+from flask_apify import http
 
 
 class TestHttpStatusCode:

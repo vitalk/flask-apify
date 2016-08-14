@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask.ext.apify.serializers import Serializer
-from flask.ext.apify.serializers.debug import DebugSerializer
-from flask.ext.apify.serializers.json import JSONSerializer
-from flask.ext.apify.serializers.jsonp import JSONPSerializer
-from flask.ext.apify.serializers.jsonp import jsonp
+from flask_apify.serializers import Serializer
+from flask_apify.serializers.debug import DebugSerializer
+from flask_apify.serializers.json import JSONSerializer
+from flask_apify.serializers.jsonp import JSONPSerializer
+from flask_apify.serializers.jsonp import jsonp
 
 
 class TestSerializer(object):

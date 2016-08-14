@@ -26,7 +26,7 @@ def read(*parts):
 
 
 def get_version():
-    version_file = read('flaskext', 'apify', '__init__.py')
+    version_file = read('flask_apify', '__init__.py')
     version_match = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]',
                               version_file, re.MULTILINE)
     if version_match:
@@ -50,11 +50,6 @@ setup(
     author_email='vital.kudzelka@gmail.com',
     description='A Flask extension to create API to your application as a ninja',
     long_description=__doc__,
-    packages=[
-        'flaskext',
-        'flaskext.apify'
-    ],
-    namespace_packages=['flaskext'],
     install_requires=['Flask'],
     tests_require=['pytest-flask', 'pytest'],
     test_suite='tests',
@@ -67,6 +62,12 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]

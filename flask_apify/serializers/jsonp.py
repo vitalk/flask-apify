@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.serializers.jsonp
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    flask_apify.serializers.jsonp
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     The JSON-P serializer for API response.
 
     :copyright: (c) by Vital Kudzelka.
 """
-from flask import json
-from flask import request
-from flask import current_app
+from flask import (
+    current_app, json, request
+)
 from werkzeug.local import LocalProxy
 
 from . import Serializer

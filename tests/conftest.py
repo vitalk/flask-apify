@@ -2,38 +2,16 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from flask import abort
-from flask import Flask
-from flask.ext.apify import Apify
-from flask.ext.apify.exc import ApiError
-
-
-def create_app(**options):
-    app = Flask(__name__, template_folder='../flaskext/apify/templates')
-
-    for key, value in options.items():
-        app.config[key.upper()] = value
-
-    return app
+from flask import (
+    abort, Flask
+)
+from flask_apify import Apify
+from flask_apify.exc import ApiError
 
 
 @pytest.fixture
 def app(request):
-    """Use `pytest.mark.app` decorator to pass options to your application
-    factory::
-
-        @pytest.mark.app(apify_default_mimetype='text/xml')
-        def test_something(app):
-            pass
-
-    During tests execution application has pushed context, e.g. `url_for`,
-    `session`, etc. can be used in tests as is::
-
-        def test_app(app, client):
-            assert client.get(url_for('view')).status_code == 200
-
-    """
-    app = create_app()
+    app = Flask(__name__)
     apify = Apify()
 
     @apify.route('/ping')

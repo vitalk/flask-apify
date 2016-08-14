@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask.ext.apify.utils
-    ~~~~~~~~~~~~~~~~~~~~~
+    flask_apify.utils
+    ~~~~~~~~~~~~~~~~~
 
     The helper functions.
 
@@ -21,8 +21,8 @@ def get_config(config, prefix):
     :param config: The original config dictionary
     :param prefix: The prefix to strip from keys of the original config
     """
-    strip = lambda x: x.replace(prefix, '')
-    return {strip(k): v for k, v in config.iteritems() if k.startswith(prefix)}
+    return {k.replace(prefix, ''): v for k, v in config.items()
+            if k.startswith(prefix)}
 
 
 self_config = lambda app: get_config(app.config, 'APIFY_')
