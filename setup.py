@@ -12,7 +12,9 @@ import io
 import os
 import re
 import sys
-from setuptools import setup
+from setuptools import (
+    setup, find_packages
+)
 from setuptools.command.test import test
 
 
@@ -50,6 +52,7 @@ setup(
     author_email='vital.kudzelka@gmail.com',
     description='A Flask extension to create API to your application as a ninja',
     long_description=__doc__,
+    packages=find_packages(exclude=['tests']),
     install_requires=['Flask'],
     tests_require=['pytest-flask', 'pytest'],
     test_suite='tests',
