@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    flask-apify
+    Flask-Apify
     ~~~~~~~~~~~
 
     A Flask extension to create an API to your application as a ninja.
@@ -12,7 +12,9 @@ import io
 import os
 import re
 import sys
-from setuptools import setup
+from setuptools import (
+    setup, find_packages
+)
 from setuptools.command.test import test
 
 
@@ -43,13 +45,15 @@ class pytest(test):
 
 
 setup(
-    name='flask-apify',
+    name='Flask-Apify',
     version=get_version(),
     license='MIT',
     author='Vital Kudzelka',
     author_email='vital.kudzelka@gmail.com',
+    url='https://github.com/vitalk/flask-apify',
     description='A Flask extension to create API to your application as a ninja',
     long_description=__doc__,
+    packages=find_packages(exclude=['tests']),
     install_requires=['Flask'],
     tests_require=['pytest-flask', 'pytest'],
     test_suite='tests',
